@@ -63,7 +63,7 @@ def apostar(dezenas):
     with sync_playwright() as p:
 
         context = p.chromium.launch_persistent_context(
-            user_data_dir="perfil-lotofacil",
+            user_data_dir=r"C:\Users\Mauricio\.playwright\lotofacil",
             channel="chrome",
             headless=False
         )
