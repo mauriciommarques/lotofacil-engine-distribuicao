@@ -1,0 +1,18 @@
+Pontos a implementar na engine.
+
+✅ Pares
+✅ Impares
+✅ Fibonacci
+✅ Moldura
+✅ Centro
+✅ Primos
+✅ Múltiplos de 3
+✅ Linhas
+✅ Colunas
+
+Pontos Opcionais...
+
+⭐ Cruz
+⭐ X
+⭐ Quadrantes
+
