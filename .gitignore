@@ -1,3 +1,16 @@
+# Python
 __pycache__/
 *.pyc
+
+# VSCode
 .vscode/
+
+# Playwright
+perfil-lotofacil/
+
+# Logs
+*.log
+
+# SQLite
+*.db
+*.sqlite
