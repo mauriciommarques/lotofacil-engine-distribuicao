@@ -1,12 +1,22 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
 
 # VSCode
 .vscode/
 
 # Playwright
 perfil-lotofacil/
+
+# Virtualenv
+.venv/
+venv/
+env/
+
+# Build
+build/
+dist/
 
 # Logs
 *.log
