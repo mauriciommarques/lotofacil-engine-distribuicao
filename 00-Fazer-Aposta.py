@@ -109,9 +109,8 @@ def apostar(dezenas):
 
             print("Marcando", texto)
 
-            page.get_by_text(
-                texto,
-                exact=True
+            page.get_by_test_id(
+                f"number-button-{numero}"
             ).click()
 
             time.sleep(1)

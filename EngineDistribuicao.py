@@ -1,18 +1,22 @@
 import random
+import requests
+from bs4 import BeautifulSoup
+
+import random
+import requests
 
 def carregar_numeros_fixos():
 
-    with open("ultimosorteio.txt", "r", encoding="utf-8") as arquivo:
+    url = "https://api.guidi.dev.br/loteria/lotofacil/ultimo"
 
-        conteudo = arquivo.read().strip()
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
 
-    return [
+    dados = response.json()
 
-        int(numero.strip())
+    dezenas = [int(n) for n in dados["listaDezenas"]]
 
-        for numero in conteudo.split(",")
-
-    ]
+    return sorted(random.sample(dezenas, 8))
 
 def erro_configuracao(regra, quantidade, maximo):
 
