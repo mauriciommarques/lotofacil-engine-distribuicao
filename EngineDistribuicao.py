@@ -1,5 +1,19 @@
 import random
 
+def carregar_numeros_fixos():
+
+    with open("ultimosorteio.txt", "r", encoding="utf-8") as arquivo:
+
+        conteudo = arquivo.read().strip()
+
+    return [
+
+        int(numero.strip())
+
+        for numero in conteudo.split(",")
+
+    ]
+
 def erro_configuracao(regra, quantidade, maximo):
 
     print()
@@ -25,6 +39,8 @@ def erro_configuracao(regra, quantidade, maximo):
     exit()
 
 
+
+
 # =====================================================
 # CONFIGURAÇÃO
 # =====================================================
@@ -46,7 +62,7 @@ impares_escolhidos = []
 TAMANHO_UNIVERSO = 19
 
 # 8 Números escolhidos por você
-NUMEROS_FIXOS = [3, 8, 11, 17, 24, 20, 13, 7]
+NUMEROS_FIXOS = carregar_numeros_fixos()
 
 multiplos3 = {
     3, 6, 9, 12, 15, 18, 21, 24
