@@ -28,7 +28,20 @@ def erro_configuracao(regra, quantidade, maximo):
 # =====================================================
 # CONFIGURAÇÃO
 # =====================================================
+moldura_jogo = []
+centro_jogo = []
+primos_jogo = []
+multiplos3_jogo = []
 
+linhas_ok = False
+colunas_ok = False
+
+resultado = []
+
+fib = []
+
+pares_escolhidos = []
+impares_escolhidos = []
 
 TAMANHO_UNIVERSO = 19
 
