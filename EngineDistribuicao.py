@@ -5,6 +5,25 @@ from bs4 import BeautifulSoup
 import random
 import requests
 
+# =====================================================
+# PARÂMETROS ESTATÍSTICOS
+# Obtidos através da análise histórica
+# =====================================================
+QTD_PARES = 8
+QTD_IMPARES = 7
+
+QTD_CENTRO = 5
+QTD_PRIMOS = 5
+QTD_FIBONACCI = 3
+QTD_MULTIPLOS3 = 5
+QTD_MOLDURA = 10
+
+QTD_MIN_LINHA = 2
+QTD_MAXLINHA = 4
+
+QTD_MIN_COLUNA = 2
+QTD_MAX_COLUNA = 4
+
 def carregar_numeros_fixos():
 
     url = "https://api.guidi.dev.br/loteria/lotofacil/ultimo"
@@ -72,17 +91,6 @@ multiplos3 = {
     3, 6, 9, 12, 15, 18, 21, 24
 }
 
-MAX_CENTRO = 5
-MAX_PRIMOS = 5
-MAX_MULTIPLOS3 = 5
-MAX_FIB = 3
-MAX_MOLDURA = 10
-
-MIN_LINHA = 2
-MAX_LINHA = 4
-
-MIN_COLUNA = 2
-MAX_COLUNA = 4
 
 linha1 = {1,2,3,4,5}
 linha2 = {6,7,8,9,10}
@@ -149,11 +157,6 @@ impares_escolhidos = [
     n for n in NUMEROS_FIXOS
     if n in impares
 ]
-
-
-
-QTD_PARES = 8
-QTD_IMPARES = 7
 
 faltam_pares = QTD_PARES - len(pares_escolhidos)
 faltam_impares = QTD_IMPARES - len(impares_escolhidos)
@@ -293,12 +296,12 @@ fib_fixos = [
     if n in NUMEROS_FIXOS
 ]
 
-if len(fib_fixos) > MAX_FIB:
+if len(fib_fixos) > QTD_FIBONACCI:
 
     erro_configuracao(
         "números Fibonacci",
         len(fib_fixos),
-        MAX_FIB
+        QTD_FIBONACCI
     )
 
 fib_removiveis = [
@@ -346,7 +349,7 @@ print(fib_removiveis_impares)
 
 
 
-EXCESSO_FIB = max(0, len(fib) - MAX_FIB)
+EXCESSO_FIB = max(0, len(fib) - QTD_FIBONACCI)
 
 print()
 print("=" * 50)
@@ -462,7 +465,7 @@ while EXCESSO_FIB > 0:
     ]
 
     
-    EXCESSO_FIB = max(0, len(fib) - MAX_FIB)
+    EXCESSO_FIB = max(0, len(fib) - QTD_FIBONACCI)
 
 # =====================================================
 # MOLDURA
@@ -496,7 +499,7 @@ if fibonacci_ok:
 
     EXCESSO_MOLDURA = max(
         0,
-        len(moldura_jogo) - MAX_MOLDURA
+        len(moldura_jogo) - QTD_MOLDURA
     )
 
     moldura_ok = True
@@ -616,7 +619,7 @@ if fibonacci_ok:
 
         EXCESSO_MOLDURA = max(
             0,
-            len(moldura_jogo) - MAX_MOLDURA
+            len(moldura_jogo) - QTD_MOLDURA
         )  
         
                                     
@@ -664,7 +667,7 @@ if fibonacci_ok:
 
     EXCESSO_CENTRO = max(
         0,
-        len(centro_jogo) - MAX_CENTRO
+        len(centro_jogo) - QTD_CENTRO
     )
 
     centro_fixos = [
@@ -672,12 +675,12 @@ if fibonacci_ok:
         if n in NUMEROS_FIXOS
     ]
 
-    if len(centro_fixos) > MAX_CENTRO:
+    if len(centro_fixos) > QTD_CENTRO:
 
         erro_configuracao(
             "números do centro",
             len(centro_fixos),
-            MAX_CENTRO
+            QTD_CENTRO
         )    
 
     centro_livres = [
@@ -746,12 +749,12 @@ if fibonacci_ok:
         if n in NUMEROS_FIXOS
     ]
 
-    if len(primos_fixos) > MAX_PRIMOS:
+    if len(primos_fixos) > QTD_PRIMOS:
 
         erro_configuracao(
             "números primos",
             len(primos_fixos),
-            MAX_PRIMOS
+            QTD_PRIMOS
         )    
 
     primos_livres = [
@@ -771,7 +774,7 @@ if fibonacci_ok:
 
     EXCESSO_PRIMOS = max(
         0,
-        len(primos_jogo) - MAX_PRIMOS
+        len(primos_jogo) - QTD_PRIMOS
     )  
 
 
@@ -869,7 +872,7 @@ if fibonacci_ok:
 
         EXCESSO_PRIMOS = max(
             0,
-            len(primos_jogo) - MAX_PRIMOS
+            len(primos_jogo) - QTD_PRIMOS
         )    
 
     multiplos3_jogo = [
@@ -883,12 +886,12 @@ if fibonacci_ok:
     ]  
 
 
-    if len(multiplos3_fixos) > MAX_MULTIPLOS3:
+    if len(multiplos3_fixos) > QTD_MULTIPLOS3:
 
         erro_configuracao(
             "múltiplos de 3",
             len(multiplos3_fixos),
-            MAX_MULTIPLOS3
+            QTD_MULTIPLOS3
         )
 
 
@@ -909,7 +912,7 @@ if fibonacci_ok:
 
     EXCESSO_MULTIPLOS3 = max(
         0,
-        len(multiplos3_jogo) - MAX_MULTIPLOS3
+        len(multiplos3_jogo) - QTD_MULTIPLOS3
     )    
 
     multiplos3_ok = True
@@ -1012,7 +1015,7 @@ if fibonacci_ok:
 
         EXCESSO_MULTIPLOS3 = max(
             0,
-            len(multiplos3_jogo) - MAX_MULTIPLOS3
+            len(multiplos3_jogo) - QTD_MULTIPLOS3
         )  
         
             
@@ -1105,21 +1108,21 @@ if fibonacci_ok:
 
     linhas_ok = all([
 
-        MIN_LINHA <= len(linha1_jogo) <= MAX_LINHA,
-        MIN_LINHA <= len(linha2_jogo) <= MAX_LINHA,
-        MIN_LINHA <= len(linha3_jogo) <= MAX_LINHA,
-        MIN_LINHA <= len(linha4_jogo) <= MAX_LINHA,
-        MIN_LINHA <= len(linha5_jogo) <= MAX_LINHA,
+        QTD_MIN_LINHA <= len(linha1_jogo) <= QTD_MAXLINHA,
+        QTD_MIN_LINHA <= len(linha2_jogo) <= QTD_MAXLINHA,
+        QTD_MIN_LINHA <= len(linha3_jogo) <= QTD_MAXLINHA,
+        QTD_MIN_LINHA <= len(linha4_jogo) <= QTD_MAXLINHA,
+        QTD_MIN_LINHA <= len(linha5_jogo) <= QTD_MAXLINHA,
 
     ])    
 
     colunas_ok = all([
 
-        MIN_COLUNA <= len(coluna1_jogo) <= MAX_COLUNA,
-        MIN_COLUNA <= len(coluna2_jogo) <= MAX_COLUNA,
-        MIN_COLUNA <= len(coluna3_jogo) <= MAX_COLUNA,
-        MIN_COLUNA <= len(coluna4_jogo) <= MAX_COLUNA,
-        MIN_COLUNA <= len(coluna5_jogo) <= MAX_COLUNA,
+        QTD_MIN_COLUNA <= len(coluna1_jogo) <= QTD_MAX_COLUNA,
+        QTD_MIN_COLUNA <= len(coluna2_jogo) <= QTD_MAX_COLUNA,
+        QTD_MIN_COLUNA <= len(coluna3_jogo) <= QTD_MAX_COLUNA,
+        QTD_MIN_COLUNA <= len(coluna4_jogo) <= QTD_MAX_COLUNA,
+        QTD_MIN_COLUNA <= len(coluna5_jogo) <= QTD_MAX_COLUNA,
 
     ])        
 
@@ -1131,7 +1134,7 @@ if fibonacci_ok:
         print("=" * 50)
 
         print("A distribuição das linhas não atende")
-        print(f"ao intervalo permitido ({MIN_LINHA} a {MAX_LINHA}).")
+        print(f"ao intervalo permitido ({QTD_MIN_LINHA} a {QTD_MAXLINHA}).")
 
         print()
         print("Sugestão:")
@@ -1148,7 +1151,7 @@ if fibonacci_ok:
         print("=" * 50)
 
         print("A distribuição das colunas não atende")
-        print(f"ao intervalo permitido ({MIN_COLUNA} a {MAX_COLUNA}).")
+        print(f"ao intervalo permitido ({QTD_MIN_COLUNA} a {QTD_MAX_COLUNA}).")
 
         print()
         print("Sugestão:")
@@ -1158,29 +1161,29 @@ if fibonacci_ok:
         exit()        
 
 
-    EXCESSO_L1 = max(0, len(linha1_jogo) - MAX_LINHA)
-    EXCESSO_L2 = max(0, len(linha2_jogo) - MAX_LINHA)
-    EXCESSO_L3 = max(0, len(linha3_jogo) - MAX_LINHA)
-    EXCESSO_L4 = max(0, len(linha4_jogo) - MAX_LINHA)
-    EXCESSO_L5 = max(0, len(linha5_jogo) - MAX_LINHA)
+    EXCESSO_L1 = max(0, len(linha1_jogo) - QTD_MAXLINHA)
+    EXCESSO_L2 = max(0, len(linha2_jogo) - QTD_MAXLINHA)
+    EXCESSO_L3 = max(0, len(linha3_jogo) - QTD_MAXLINHA)
+    EXCESSO_L4 = max(0, len(linha4_jogo) - QTD_MAXLINHA)
+    EXCESSO_L5 = max(0, len(linha5_jogo) - QTD_MAXLINHA)
 
-    FALTA_L1 = max(0, MIN_LINHA - len(linha1_jogo))
-    FALTA_L2 = max(0, MIN_LINHA - len(linha2_jogo))
-    FALTA_L3 = max(0, MIN_LINHA - len(linha3_jogo))
-    FALTA_L4 = max(0, MIN_LINHA - len(linha4_jogo))
-    FALTA_L5 = max(0, MIN_LINHA - len(linha5_jogo))
+    FALTA_L1 = max(0, QTD_MIN_LINHA - len(linha1_jogo))
+    FALTA_L2 = max(0, QTD_MIN_LINHA - len(linha2_jogo))
+    FALTA_L3 = max(0, QTD_MIN_LINHA - len(linha3_jogo))
+    FALTA_L4 = max(0, QTD_MIN_LINHA - len(linha4_jogo))
+    FALTA_L5 = max(0, QTD_MIN_LINHA - len(linha5_jogo))
 
-    EXCESSO_C1 = max(0, len(coluna1_jogo) - MAX_COLUNA)
-    EXCESSO_C2 = max(0, len(coluna2_jogo) - MAX_COLUNA)
-    EXCESSO_C3 = max(0, len(coluna3_jogo) - MAX_COLUNA)
-    EXCESSO_C4 = max(0, len(coluna4_jogo) - MAX_COLUNA)
-    EXCESSO_C5 = max(0, len(coluna5_jogo) - MAX_COLUNA)
+    EXCESSO_C1 = max(0, len(coluna1_jogo) - QTD_MAX_COLUNA)
+    EXCESSO_C2 = max(0, len(coluna2_jogo) - QTD_MAX_COLUNA)
+    EXCESSO_C3 = max(0, len(coluna3_jogo) - QTD_MAX_COLUNA)
+    EXCESSO_C4 = max(0, len(coluna4_jogo) - QTD_MAX_COLUNA)
+    EXCESSO_C5 = max(0, len(coluna5_jogo) - QTD_MAX_COLUNA)
 
-    FALTA_C1 = max(0, MIN_COLUNA - len(coluna1_jogo))
-    FALTA_C2 = max(0, MIN_COLUNA - len(coluna2_jogo))
-    FALTA_C3 = max(0, MIN_COLUNA - len(coluna3_jogo))
-    FALTA_C4 = max(0, MIN_COLUNA - len(coluna4_jogo))
-    FALTA_C5 = max(0, MIN_COLUNA - len(coluna5_jogo))    
+    FALTA_C1 = max(0, QTD_MIN_COLUNA - len(coluna1_jogo))
+    FALTA_C2 = max(0, QTD_MIN_COLUNA - len(coluna2_jogo))
+    FALTA_C3 = max(0, QTD_MIN_COLUNA - len(coluna3_jogo))
+    FALTA_C4 = max(0, QTD_MIN_COLUNA - len(coluna4_jogo))
+    FALTA_C5 = max(0, QTD_MIN_COLUNA - len(coluna5_jogo))    
 
     print()
     print("=" * 50)
@@ -1290,39 +1293,39 @@ print("=" * 50)
 print("VALIDAÇÃO FINAL")
 print("=" * 50)
 
-status_moldura = len(moldura_jogo) <= MAX_MOLDURA
-status_centro = len(centro_jogo) <= MAX_CENTRO
-status_primos = len(primos_jogo) <= MAX_PRIMOS
+status_moldura = len(moldura_jogo) <= QTD_MOLDURA
+status_centro = len(centro_jogo) <= QTD_CENTRO
+status_primos = len(primos_jogo) <= QTD_PRIMOS
 status_pares = len(pares_escolhidos) == QTD_PARES
 status_impares = len(impares_escolhidos) == QTD_IMPARES
-status_multiplos3 = len(multiplos3_jogo) <= MAX_MULTIPLOS3
-status_fib = len(fib) <= MAX_FIB
+status_multiplos3 = len(multiplos3_jogo) <= QTD_MULTIPLOS3
+status_fib = len(fib) <= QTD_FIBONACCI
 status_total = len(resultado) == 15
 status_linhas = linhas_ok
 status_colunas = colunas_ok
 
 print(
-    f"Fibonacci : {len(fib)} / {MAX_FIB} ->",
+    f"Fibonacci : {len(fib)} / {QTD_FIBONACCI} ->",
     "OK" if status_fib else "ERRO"
 )
 
 print(
-    f"Moldura   : {len(moldura_jogo)} / {MAX_MOLDURA} ->",
+    f"Moldura   : {len(moldura_jogo)} / {QTD_MOLDURA} ->",
     "OK" if status_moldura else "ERRO"
 )
 
 print(
-    f"Centro    : {len(centro_jogo)} / {MAX_CENTRO} ->",
+    f"Centro    : {len(centro_jogo)} / {QTD_CENTRO} ->",
     "OK" if status_centro else "ERRO"
 )
 
 print(
-    f"Primos    : {len(primos_jogo)} / {MAX_PRIMOS} ->",
+    f"Primos    : {len(primos_jogo)} / {QTD_PRIMOS} ->",
     "OK" if status_primos else "ERRO"
 )
 
 print(
-    f"Múltiplos3: {len(multiplos3_jogo)} / {MAX_MULTIPLOS3} ->",
+    f"Múltiplos3: {len(multiplos3_jogo)} / {QTD_MULTIPLOS3} ->",
     "OK" if status_multiplos3 else "ERRO"
 )
 
