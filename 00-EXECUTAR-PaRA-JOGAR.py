@@ -3,6 +3,7 @@ import ast
 import time
 import importlib
 from contextlib import redirect_stdout
+from datetime import datetime
 
 from playwright.sync_api import sync_playwright
 
@@ -119,20 +120,47 @@ def apostar(dezenas):
         print("=" * 50)
         print("JOGO PREENCHIDO")
         print("=" * 50)
-
-        input("Confira o volante e pressione ENTER para fechar...")
-
-        context.close()
-
-
+        print("Feche o navegador quando terminar a aposta.")
+        context.wait_for_event("close")
+        
 # ==========================================================
 # MAIN
 # ==========================================================
 
 if __name__ == "__main__":
 
-    jogo = gerar()
+    tentativa = 1
 
-    if jogo:
+    while True:
 
-        apostar(jogo)
+        horario = datetime.now().strftime("%H:%M:%S")
+
+        print("\n" * 3)
+        print("=" * 60)
+        print(f"TENTATIVA {tentativa:05d} | {horario}")
+        print("=" * 60)
+
+        jogo = gerar()
+
+        if jogo:
+
+            print()
+            print("=" * 60)
+            print("COMBINAÇÃO ENCONTRADA")
+            print("=" * 60)
+
+            apostar(jogo)
+            break
+
+        horario = datetime.now().strftime("%H:%M:%S")
+
+        print()
+        print("=" * 60)
+        print(f"[{horario}] Combinação não encontrada.")
+        print("Nova tentativa em 4 segundos...")
+        print("=" * 60)
+
+        tentativa += 1
+
+        time.sleep(4)    
+    

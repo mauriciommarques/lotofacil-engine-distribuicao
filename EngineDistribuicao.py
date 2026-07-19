@@ -477,6 +477,16 @@ if fibonacci_ok:
         if n in moldura
     ]
 
+    FALTA_MOLDURA = max(
+        0,
+        QTD_MOLDURA - len(moldura_jogo)
+    )
+
+    EXCESSO_MOLDURA = max(
+        0,
+        len(moldura_jogo) - QTD_MOLDURA
+    )    
+
     moldura_fixas = [
         n for n in moldura_jogo
         if n in NUMEROS_FIXOS
@@ -658,7 +668,8 @@ if fibonacci_ok:
     print("=" * 50)
     print("AJUSTE MOLDURA")
     print("=" * 50)
-    print("Excesso:", EXCESSO_MOLDURA)
+    print("Excesso :", EXCESSO_MOLDURA)
+    print("Falta   :", FALTA_MOLDURA)
 
     centro_jogo = [
         n for n in resultado
