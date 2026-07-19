@@ -347,15 +347,20 @@ print(fib_removiveis_impares)
 # AJUSTE FIBONACCI
 # =====================================================
 
-
-
 EXCESSO_FIB = max(0, len(fib) - QTD_FIBONACCI)
+
+FALTA_FIB = max(
+    0,
+    QTD_FIBONACCI - len(fib)
+)
 
 print()
 print("=" * 50)
 print("AJUSTE FIBONACCI")
 print("=" * 50)
-print("Excesso:", EXCESSO_FIB)
+
+print("Excesso :", EXCESSO_FIB)
+print("Falta   :", FALTA_FIB)
 
 fibonacci_ok = True
 
@@ -463,9 +468,14 @@ while EXCESSO_FIB > 0:
         n for n in fib
         if n in numeros_livres
     ]
-
     
     EXCESSO_FIB = max(0, len(fib) - QTD_FIBONACCI)
+
+    FALTA_FIB = max(
+        0,
+        QTD_FIBONACCI - len(fib)
+    )    
+
 
 # =====================================================
 # MOLDURA
@@ -788,6 +798,10 @@ if fibonacci_ok:
         len(primos_jogo) - QTD_PRIMOS
     )  
 
+    FALTA_PRIMOS = max(
+        0,
+        QTD_PRIMOS - len(primos_jogo)
+    )    
 
     primos_ok = True
 
@@ -886,6 +900,12 @@ if fibonacci_ok:
             len(primos_jogo) - QTD_PRIMOS
         )    
 
+        FALTA_PRIMOS = max(
+            0,
+            QTD_PRIMOS - len(primos_jogo)
+        )
+
+
     multiplos3_jogo = [
         n for n in resultado
         if n in multiplos3
@@ -924,6 +944,11 @@ if fibonacci_ok:
     EXCESSO_MULTIPLOS3 = max(
         0,
         len(multiplos3_jogo) - QTD_MULTIPLOS3
+    )    
+
+    FALTA_MULTIPLOS3 = max(
+        0,
+        QTD_MULTIPLOS3 - len(multiplos3_jogo)
     )    
 
     multiplos3_ok = True
@@ -1065,7 +1090,9 @@ if fibonacci_ok:
     print("=" * 50)
     print("AJUSTE PRIMOS")
     print("=" * 50)
-    print("Excesso:", EXCESSO_PRIMOS)   
+
+    print("Excesso :", EXCESSO_PRIMOS)
+    print("Falta   :", FALTA_PRIMOS)
 
     print()
     print("=" * 50)
@@ -1102,7 +1129,9 @@ if fibonacci_ok:
     print("=" * 50)
     print("AJUSTE MÚLTIPLOS DE 3")
     print("=" * 50)
-    print("Excesso:", EXCESSO_MULTIPLOS3)     
+    
+    print("Excesso :", EXCESSO_MULTIPLOS3)
+    print("Falta   :", FALTA_MULTIPLOS3)
 
     linha1_jogo = [n for n in resultado if n in linha1]
     linha2_jogo = [n for n in resultado if n in linha2]
@@ -1306,11 +1335,11 @@ print("=" * 50)
 
 status_moldura = len(moldura_jogo) == QTD_MOLDURA
 status_centro = len(centro_jogo) <= QTD_CENTRO
-status_primos = len(primos_jogo) <= QTD_PRIMOS
+status_primos = len(primos_jogo) == QTD_PRIMOS
 status_pares = len(pares_escolhidos) == QTD_PARES
 status_impares = len(impares_escolhidos) == QTD_IMPARES
-status_multiplos3 = len(multiplos3_jogo) <= QTD_MULTIPLOS3
-status_fib = len(fib) <= QTD_FIBONACCI
+status_multiplos3 = len(multiplos3_jogo) == QTD_MULTIPLOS3
+status_fib = len(fib) == QTD_FIBONACCI
 status_total = len(resultado) == 15
 status_linhas = linhas_ok
 status_colunas = colunas_ok

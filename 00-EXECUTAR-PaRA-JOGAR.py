@@ -121,7 +121,7 @@ def apostar(dezenas):
         print("JOGO PREENCHIDO")
         print("=" * 50)
         print("Feche o navegador quando terminar a aposta.")
-        context.wait_for_event("close")
+        page.wait_for_event("close", timeout=0)
         
 # ==========================================================
 # MAIN
