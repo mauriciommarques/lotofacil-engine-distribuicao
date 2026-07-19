@@ -12,17 +12,13 @@ import requests
 QTD_PARES = 8
 QTD_IMPARES = 7
 
-QTD_CENTRO = 5
+QTD_CENTRO = 6
 QTD_PRIMOS = 5
-QTD_FIBONACCI = 3
+QTD_FIBONACCI = 4
 QTD_MULTIPLOS3 = 5
-QTD_MOLDURA = 10
+QTD_MOLDURA = 9
 
-QTD_MIN_LINHA = 2
-QTD_MAXLINHA = 4
-
-QTD_MIN_COLUNA = 2
-QTD_MAX_COLUNA = 4
+MAX_SEQUENCIA = 5
 
 def carregar_numeros_fixos():
 
@@ -61,8 +57,20 @@ def erro_configuracao(regra, quantidade, maximo):
 
     exit()
 
+def maior_sequencia(jogo):
+    jogo = sorted(jogo)
 
+    maior = 1
+    atual = 1
 
+    for i in range(1, len(jogo)):
+        if jogo[i] == jogo[i - 1] + 1:
+            atual += 1
+            maior = max(maior, atual)
+        else:
+            atual = 1
+
+    return maior    
 
 # =====================================================
 # CONFIGURAÇÃO
@@ -71,9 +79,6 @@ moldura_jogo = []
 centro_jogo = []
 primos_jogo = []
 multiplos3_jogo = []
-
-linhas_ok = False
-colunas_ok = False
 
 resultado = []
 
@@ -1251,178 +1256,6 @@ if fibonacci_ok:
     print("Excesso :", EXCESSO_MULTIPLOS3)
     print("Falta   :", FALTA_MULTIPLOS3)
 
-    linha1_jogo = [n for n in resultado if n in linha1]
-    linha2_jogo = [n for n in resultado if n in linha2]
-    linha3_jogo = [n for n in resultado if n in linha3]
-    linha4_jogo = [n for n in resultado if n in linha4]
-    linha5_jogo = [n for n in resultado if n in linha5]
-
-    coluna1_jogo = [n for n in resultado if n in coluna1]
-    coluna2_jogo = [n for n in resultado if n in coluna2]
-    coluna3_jogo = [n for n in resultado if n in coluna3]
-    coluna4_jogo = [n for n in resultado if n in coluna4]
-    coluna5_jogo = [n for n in resultado if n in coluna5]
-
-
-    linhas_ok = all([
-
-        QTD_MIN_LINHA <= len(linha1_jogo) <= QTD_MAXLINHA,
-        QTD_MIN_LINHA <= len(linha2_jogo) <= QTD_MAXLINHA,
-        QTD_MIN_LINHA <= len(linha3_jogo) <= QTD_MAXLINHA,
-        QTD_MIN_LINHA <= len(linha4_jogo) <= QTD_MAXLINHA,
-        QTD_MIN_LINHA <= len(linha5_jogo) <= QTD_MAXLINHA,
-
-    ])    
-
-    colunas_ok = all([
-
-        QTD_MIN_COLUNA <= len(coluna1_jogo) <= QTD_MAX_COLUNA,
-        QTD_MIN_COLUNA <= len(coluna2_jogo) <= QTD_MAX_COLUNA,
-        QTD_MIN_COLUNA <= len(coluna3_jogo) <= QTD_MAX_COLUNA,
-        QTD_MIN_COLUNA <= len(coluna4_jogo) <= QTD_MAX_COLUNA,
-        QTD_MIN_COLUNA <= len(coluna5_jogo) <= QTD_MAX_COLUNA,
-
-    ])        
-
-    if not linhas_ok:
-
-        print()
-        print("=" * 50)
-        print("LINHAS INVÁLIDAS")
-        print("=" * 50)
-
-        print("A distribuição das linhas não atende")
-        print(f"ao intervalo permitido ({QTD_MIN_LINHA} a {QTD_MAXLINHA}).")
-
-        print()
-        print("Sugestão:")
-        print("Execute novamente o gerador (F5).")
-        print("Uma nova combinação poderá atender esta regra.")
-
-        exit()
-
-    if not colunas_ok:
-
-        print()
-        print("=" * 50)
-        print("COLUNAS INVÁLIDAS")
-        print("=" * 50)
-
-        print("A distribuição das colunas não atende")
-        print(f"ao intervalo permitido ({QTD_MIN_COLUNA} a {QTD_MAX_COLUNA}).")
-
-        print()
-        print("Sugestão:")
-        print("Execute novamente o gerador (F5).")
-        print("Uma nova combinação poderá atender esta regra.")
-
-        exit()        
-
-
-    EXCESSO_L1 = max(0, len(linha1_jogo) - QTD_MAXLINHA)
-    EXCESSO_L2 = max(0, len(linha2_jogo) - QTD_MAXLINHA)
-    EXCESSO_L3 = max(0, len(linha3_jogo) - QTD_MAXLINHA)
-    EXCESSO_L4 = max(0, len(linha4_jogo) - QTD_MAXLINHA)
-    EXCESSO_L5 = max(0, len(linha5_jogo) - QTD_MAXLINHA)
-
-    FALTA_L1 = max(0, QTD_MIN_LINHA - len(linha1_jogo))
-    FALTA_L2 = max(0, QTD_MIN_LINHA - len(linha2_jogo))
-    FALTA_L3 = max(0, QTD_MIN_LINHA - len(linha3_jogo))
-    FALTA_L4 = max(0, QTD_MIN_LINHA - len(linha4_jogo))
-    FALTA_L5 = max(0, QTD_MIN_LINHA - len(linha5_jogo))
-
-    EXCESSO_C1 = max(0, len(coluna1_jogo) - QTD_MAX_COLUNA)
-    EXCESSO_C2 = max(0, len(coluna2_jogo) - QTD_MAX_COLUNA)
-    EXCESSO_C3 = max(0, len(coluna3_jogo) - QTD_MAX_COLUNA)
-    EXCESSO_C4 = max(0, len(coluna4_jogo) - QTD_MAX_COLUNA)
-    EXCESSO_C5 = max(0, len(coluna5_jogo) - QTD_MAX_COLUNA)
-
-    FALTA_C1 = max(0, QTD_MIN_COLUNA - len(coluna1_jogo))
-    FALTA_C2 = max(0, QTD_MIN_COLUNA - len(coluna2_jogo))
-    FALTA_C3 = max(0, QTD_MIN_COLUNA - len(coluna3_jogo))
-    FALTA_C4 = max(0, QTD_MIN_COLUNA - len(coluna4_jogo))
-    FALTA_C5 = max(0, QTD_MIN_COLUNA - len(coluna5_jogo))    
-
-    print()
-    print("=" * 50)
-
-    print("LINHAS")
-    print("=" * 50)
-
-    print("Linha 1:", linha1_jogo)
-    print("Quantidade:", len(linha1_jogo))
-
-    print()
-
-    print("Linha 2:", linha2_jogo)
-    print("Quantidade:", len(linha2_jogo))
-
-    print()
-
-    print("Linha 3:", linha3_jogo)
-    print("Quantidade:", len(linha3_jogo))
-
-    print()
-
-    print("Linha 4:", linha4_jogo)
-    print("Quantidade:", len(linha4_jogo))
-
-    print()
-
-    print("Linha 5:", linha5_jogo)
-    print("Quantidade:", len(linha5_jogo))
-
-    print()
-    print("=" * 50)
-    print("AJUSTE LINHAS")
-    print("=" * 50)
-
-    print(f"Linha 1 -> Excesso: {EXCESSO_L1} | Falta: {FALTA_L1}")
-    print(f"Linha 2 -> Excesso: {EXCESSO_L2} | Falta: {FALTA_L2}")
-    print(f"Linha 3 -> Excesso: {EXCESSO_L3} | Falta: {FALTA_L3}")
-    print(f"Linha 4 -> Excesso: {EXCESSO_L4} | Falta: {FALTA_L4}")
-    print(f"Linha 5 -> Excesso: {EXCESSO_L5} | Falta: {FALTA_L5}")    
-
-    #aqui
-    print()
-    print("=" * 50)
-
-    print("COLUNAS")
-    print("=" * 50)
-
-    print("Coluna 1:", coluna1_jogo)
-    print("Quantidade:", len(coluna1_jogo))
-
-    print()
-
-    print("Coluna 2:", coluna2_jogo)
-    print("Quantidade:", len(coluna2_jogo))
-
-    print()
-
-    print("Coluna 3:", coluna3_jogo)
-    print("Quantidade:", len(coluna3_jogo))
-
-    print()
-
-    print("Coluna 4:", coluna4_jogo)
-    print("Quantidade:", len(coluna4_jogo))
-
-    print()
-
-    print("Coluna 5:", coluna5_jogo)
-    print("Quantidade:", len(coluna5_jogo))
-
-    print()
-    print("=" * 50)
-    print("AJUSTE COLUNAS")
-    print("=" * 50)
-
-    print(f"Coluna 1 -> Excesso: {EXCESSO_C1} | Falta: {FALTA_C1}")
-    print(f"Coluna 2 -> Excesso: {EXCESSO_C2} | Falta: {FALTA_C2}")
-    print(f"Coluna 3 -> Excesso: {EXCESSO_C3} | Falta: {FALTA_C3}")
-    print(f"Coluna 4 -> Excesso: {EXCESSO_C4} | Falta: {FALTA_C4}")
-    print(f"Coluna 5 -> Excesso: {EXCESSO_C5} | Falta: {FALTA_C5}")    
 
 print()
 print("=" * 50)
@@ -1442,6 +1275,24 @@ print("Quantidade:", len(fib))
 print()
 print("Ainda faltam remover:", EXCESSO_FIB)
 
+status_sequencia = maior_sequencia(resultado) <= MAX_SEQUENCIA
+
+if not status_sequencia:
+
+    print()
+    print("=" * 50)
+    print("SEQUÊNCIA INVÁLIDA")
+    print("=" * 50)
+
+    print("Maior sequência encontrada:",
+          maior_sequencia(resultado))
+
+    print("Máximo permitido:",
+          MAX_SEQUENCIA)
+
+    exit()
+
+
 # =====================================================
 # VALIDAÇÃO FINAL
 # =====================================================
@@ -1459,8 +1310,6 @@ status_impares = len(impares_escolhidos) == QTD_IMPARES
 status_multiplos3 = len(multiplos3_jogo) == QTD_MULTIPLOS3
 status_fib = len(fib) == QTD_FIBONACCI
 status_total = len(resultado) == 15
-status_linhas = linhas_ok
-status_colunas = colunas_ok
 
 print(
     f"Fibonacci : {len(fib)} / {QTD_FIBONACCI} ->",
@@ -1488,14 +1337,6 @@ print(
 )
 
 print(
-    f"Linhas    : {'OK' if status_linhas else 'ERRO'}"
-)
-
-print(
-    f"Colunas   : {'OK' if status_colunas else 'ERRO'}"
-)
-
-print(
     f"Pares     : {len(pares_escolhidos)} / {QTD_PARES} ->",
     "OK" if status_pares else "ERRO"
 )
@@ -1510,6 +1351,11 @@ print(
     "OK" if status_total else "ERRO"
 )
 
+print(
+    f"Sequência : {maior_sequencia(resultado)} / {MAX_SEQUENCIA} ->",
+    "OK" if status_sequencia else "ERRO"
+)
+
 jogo_valido = all([
     status_fib,
     status_moldura,
@@ -1519,8 +1365,7 @@ jogo_valido = all([
     status_pares,
     status_impares,
     status_total,
-    status_linhas,
-    status_colunas
+    status_sequencia
 ])
 
 print()
