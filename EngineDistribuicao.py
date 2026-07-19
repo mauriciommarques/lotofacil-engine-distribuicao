@@ -1304,7 +1304,7 @@ print("=" * 50)
 print("VALIDAÇÃO FINAL")
 print("=" * 50)
 
-status_moldura = len(moldura_jogo) <= QTD_MOLDURA
+status_moldura = len(moldura_jogo) == QTD_MOLDURA
 status_centro = len(centro_jogo) <= QTD_CENTRO
 status_primos = len(primos_jogo) <= QTD_PRIMOS
 status_pares = len(pares_escolhidos) == QTD_PARES
