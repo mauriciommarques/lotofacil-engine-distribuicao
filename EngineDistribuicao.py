@@ -564,8 +564,7 @@ if fibonacci_ok:
                     pares_escolhidos.append(novo)
 
                     trocou = True
-
-                    break                    
+                    break                  
                 
             else:
 
@@ -590,8 +589,7 @@ if fibonacci_ok:
                     impares_escolhidos.append(novo)
 
                     trocou = True
-
-                    break                
+                    break            
 
         if not trocou:
 
@@ -691,6 +689,11 @@ if fibonacci_ok:
         len(centro_jogo) - QTD_CENTRO
     )
 
+    FALTA_CENTRO = max(
+        0,
+        QTD_CENTRO - len(centro_jogo)
+    )    
+
     centro_fixos = [
         n for n in centro_jogo
         if n in NUMEROS_FIXOS
@@ -718,6 +721,127 @@ if fibonacci_ok:
         n for n in centro_livres
         if n in impares
     ]  
+
+    print()
+    print("=" * 50)
+    print("AJUSTE CENTRO")
+    print("=" * 50)
+    print("Excesso:", EXCESSO_CENTRO)
+    print("Falta  :", FALTA_CENTRO)  
+
+    centro_ok = True
+
+    while EXCESSO_CENTRO > 0:
+
+        print()
+        print("Precisamos remover", EXCESSO_CENTRO, "Centro")
+
+        random.shuffle(centro_livres)
+
+        trocou = False    
+
+        for remover in centro_livres:
+
+            print()
+            print("Tentando remover:", remover)
+
+            if remover in pares:
+
+                print("É um PAR")
+
+                pares_reposicao = [
+                    n for n in universo
+                    if n in moldura
+                    and n in pares
+                    and n not in resultado
+                ]
+
+                print("Reposição possível:", sorted(pares_reposicao))
+
+                if pares_reposicao:
+
+                    novo = random.choice(pares_reposicao)
+
+                    print("Entrando:", novo)
+
+                    pares_escolhidos.remove(remover)
+                    pares_escolhidos.append(novo)
+
+                    trocou = True
+                    break                
+
+            else:
+
+                print("É um ÍMPAR")
+
+                impares_reposicao = [
+                    n for n in universo
+                    if n in moldura
+                    and n in impares
+                    and n not in resultado
+                ]
+
+                print("Reposição possível:", sorted(impares_reposicao))   
+
+                if impares_reposicao:
+
+                    novo = random.choice(impares_reposicao)
+
+                    print("Entrando:", novo)
+
+                    impares_escolhidos.remove(remover)
+                    impares_escolhidos.append(novo)
+
+                    trocou = True
+                    break                       
+
+        if not trocou:
+
+            print()
+            print("Não existe reposição possível.")
+            print("O universo sorteado não permite cumprir essa regra.")
+
+            centro_ok = False
+            break
+        
+        resultado = sorted(
+            pares_escolhidos + impares_escolhidos
+        )
+
+        numeros_livres = [
+            n for n in resultado
+            if n not in NUMEROS_FIXOS
+        ]
+
+        centro_jogo = [
+            n for n in resultado
+            if n in centro
+        ]
+
+        centro_livres = [
+            n for n in centro_jogo
+            if n in numeros_livres
+        ]
+
+        centro_livres_pares = [
+            n for n in centro_livres
+            if n in pares
+        ]
+
+        centro_livres_impares = [
+            n for n in centro_livres
+            if n in impares
+        ]
+
+        EXCESSO_CENTRO = max(
+            0,
+            len(centro_jogo) - QTD_CENTRO
+        )
+
+        FALTA_CENTRO = max(
+            0,
+            QTD_CENTRO - len(centro_jogo)
+        )            
 
     print()
     print("=" * 50)
@@ -749,12 +873,6 @@ if fibonacci_ok:
     print("CENTRO LIVRES ÍMPARES")
     print("=" * 50)
     print(centro_livres_impares)
-
-    print()
-    print("=" * 50)
-    print("AJUSTE CENTRO")
-    print("=" * 50)
-    print("Excesso:", EXCESSO_CENTRO) 
 
     # =====================================================
     # PRIMOS
@@ -1334,7 +1452,7 @@ print("VALIDAÇÃO FINAL")
 print("=" * 50)
 
 status_moldura = len(moldura_jogo) == QTD_MOLDURA
-status_centro = len(centro_jogo) <= QTD_CENTRO
+status_centro = len(centro_jogo) == QTD_CENTRO
 status_primos = len(primos_jogo) == QTD_PRIMOS
 status_pares = len(pares_escolhidos) == QTD_PARES
 status_impares = len(impares_escolhidos) == QTD_IMPARES
