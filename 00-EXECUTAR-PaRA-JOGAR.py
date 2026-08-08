@@ -1,66 +1,144 @@
-import io
-import ast
+# ==========================================================
+# IMPORTS
+# ==========================================================
+
 import time
-import importlib
-from contextlib import redirect_stdout
+
 from datetime import datetime
-import random
+
+import boto3
 
 from playwright.sync_api import sync_playwright
 
+# ==========================================================
+# CONFIG
+# ==========================================================
+
+REGION = "ap-east-1"
+
+TABLE_NAME = "jogos_lotofacil"
 
 # ==========================================================
-# GERA O JOGO
+# DYNAMODB
 # ==========================================================
 
-def gerar():
+dynamodb = boto3.resource(
+    "dynamodb",
+    region_name=REGION
+)
 
-    buffer = io.StringIO()
+table = dynamodb.Table(
+    TABLE_NAME
+)
 
-    try:
+# ==========================================================
+# BUSCAR JOGO
+# ==========================================================
 
-        with redirect_stdout(buffer):
+def BuscarJogos():
 
-            import EngineDistribuicao
-            importlib.reload(EngineDistribuicao)
-    
-    except SystemExit:
+    response = table.scan()
 
-        print()
-        print("=" * 50)
-        print("NENHUMA COMBINAÇÃO VÁLIDA ENCONTRADA")
-        print("=" * 50)
-        print("Aguardando nova tentativa...")
+    jogos = response.get(
+        "Items",
+        []
+    )
+
+    hoje = datetime.now().strftime("%Y-%m-%d")
+
+    jogos = [
+
+        jogo
+
+        for jogo in jogos
+
+        if jogo["data"] == hoje
+
+    ]
+
+    if not jogos:
 
         return None
-    
-    saida = buffer.getvalue()
 
-    linhas = saida.splitlines()
+    jogos.sort(
+        key=lambda jogo: jogo["sk"]
+    )
 
-    for i, linha in enumerate(linhas):
-
-        if linha.strip() == "NOVO RESULTADO":
-
-            jogo = ast.literal_eval(linhas[i + 2])
-
-            print()
-            print("=" * 50)
-            print("JOGO GERADO")
-            print("=" * 50)
-            print(jogo)
-
-            return jogo
-
-    print("Resultado não encontrado.")
-    return None
-
+    return jogos
 
 # ==========================================================
 # AUTOMAÇÃO
 # ==========================================================
 
-def apostar(dezenas):
+def apostar(
+    page,
+    jogo
+):
+
+    dezenas = jogo["jogo"]
+
+    print()
+    print("=" * 50)
+    print("MARCANDO DEZENAS")
+    print("=" * 50)
+
+    print("Concurso :", jogo["concurso"])
+    print("Data      :", jogo["data"])
+
+    print()
+
+    for numero in dezenas:
+
+        texto = f"{numero:02d}"
+
+        print("Marcando", texto)
+
+        page.get_by_test_id(
+            f"number-button-{numero}"
+        ).click()
+
+        time.sleep(1)
+
+    print()
+
+    print("Aguardando validação do volante...")
+
+    time.sleep(2)
+
+    botao = page.get_by_role(
+        "button",
+        name="Incluir aposta",
+        exact=True
+    )
+
+    botao.wait_for()
+
+    print("Incluindo aposta no carrinho...")
+
+    botao.click()
+
+    page.wait_for_load_state(
+        "networkidle"
+    )
+
+    time.sleep(1)
+        
+# ==========================================================
+# MAIN
+# ==========================================================
+if __name__ == "__main__":
+
+    jogos = BuscarJogos()
+
+    if not jogos:
+
+        print("Nenhum jogo disponível.")
+        exit()
+
+    print()
+    print("=" * 60)
+    print(f"{len(jogos)} jogo(s) encontrado(s).")
+    print("=" * 60)
 
     with sync_playwright() as p:
 
@@ -78,7 +156,11 @@ def apostar(dezenas):
             "https://www.sorteonline.com.br/catalogo?lotofacil=true&sort=price:desc"
         )
 
-        time.sleep(2)
+        page.wait_for_load_state(
+            "networkidle"
+        )
+
+        time.sleep(1)
 
         print("Entrando na Lotofácil...")
 
@@ -92,102 +174,41 @@ def apostar(dezenas):
 
         print("Abrindo volante...")
 
-        page.get_by_role(
+        botao = page.get_by_role(
             "button",
             name="Apostar Agora",
             exact=True
-        ).click()
+        )
+
+        botao.wait_for()
+
+        botao.click()
 
         time.sleep(2)
 
-        print()
-        print("=" * 50)
-        print("MARCANDO DEZENAS")
-        print("=" * 50)
-
-        for numero in dezenas:
-
-            texto = f"{numero:02d}"
-
-            print("Marcando", texto)
-
-            page.get_by_test_id(
-                f"number-button-{numero}"
-            ).click()
-
-            time.sleep(1)
-
-        print()
-        print("=" * 50)
-        print("JOGO PREENCHIDO")
-        print("=" * 50)
-        print("Feche o navegador quando terminar a aposta.")
-        page.wait_for_event("close", timeout=0)
-        
-# ==========================================================
-# MAIN
-# ==========================================================
-
-if __name__ == "__main__":
-
-    tentativa = 1
-
-    while True:
-
-        horario = datetime.now().strftime("%H:%M:%S")
-
-        print("\n" * 3)
-        print("=" * 60)
-        print(f"TENTATIVA {tentativa:05d} | {horario}")
-        print("=" * 60)
-
-        jogo = gerar()
-
-        if jogo:
+        for indice, jogo in enumerate(jogos, start=1):
 
             print()
             print("=" * 60)
-            print("COMBINAÇÃO ENCONTRADA")
+            print(f"JOGO {indice}")
             print("=" * 60)
 
-            apostar(jogo)
-            break
-
-        horario = datetime.now().strftime("%H:%M:%S")
-
-        print()
-        print("=" * 60)
-        print(f"[{horario}] Combinação não encontrada.")
-        print("=" * 60)
-
-        tentativa += 1
-
-        horario = datetime.now().strftime("%H:%M:%S")
-
-        tempo_espera = random.randint(40, 75)
-
-        print()
-        print("=" * 60)
-        print(f"[{horario}] Nenhum jogo aprovado pelos filtros.")
-        print(f"Aguardando {tempo_espera} segundos para nova tentativa...")
-        print("=" * 60)
-
-        tentativa += 1
-
-        for restante in range(tempo_espera, 0, -1):
-
-            minutos = restante // 60
-            segundos = restante % 60
-
-            print(
-                f"\rPróxima tentativa em {minutos:02d}:{segundos:02d}",
-                end="",
-                flush=True
+            apostar(
+                page,
+                jogo
             )
 
-            time.sleep(1)
+        print()
+        print("=" * 60)
+        print("TODOS OS JOGOS FORAM ADICIONADOS AO CARRINHO")
+        print("=" * 60)
+        print("Revise os jogos.")
+        print("Remova os que não desejar.")
+        print("Finalize a compra.")
+        print("Depois feche o navegador.")
+        print("=" * 60)
 
-        print()
-        print()
-        print("Iniciando nova tentativa...")
-        time.sleep(1)
+        page.wait_for_event(
+            "close",
+            timeout=0
+        )
