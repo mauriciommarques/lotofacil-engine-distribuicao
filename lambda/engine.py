@@ -3,7 +3,6 @@
 import json
 import boto3
 
-import requests
 import random
 
 from datetime import datetime, timezone
@@ -46,8 +45,14 @@ dynamodb = boto3.resource(
     region_name=REGION
 )
 
+TABLE_RESULTADO = "resultado_lotofacil"
+
 table = dynamodb.Table(
     TABLE_NAME
+)
+
+resultado_table = dynamodb.Table(
+    TABLE_RESULTADO
 )
 
 def maior_sequencia(jogo):
@@ -93,38 +98,38 @@ def contar_sequencias_maximas(jogo, tamanho):
 # ==========================================================
 def buscar_fixos_concurso_anterior():
 
-    url = (
-        "https://raw.githubusercontent.com/"
-        "maickon/free-apiloterias/"
-        "refs/heads/master/"
-        "database/lotofacil/_ultimo.json"
+    response = resultado_table.get_item(
+
+        Key={
+
+            "pk": "LOTOFACIL",
+
+            "sk": "ULTIMO"
+
+        }
+
     )
 
-    response = requests.get(
-        url,
-        timeout=10
-    )
+    item = response.get("Item")
 
-    response.raise_for_status()
+    if not item:
 
-    dados = response.json()
-
-    dezenas = [
-        int(numero)
-        for numero in dados["listaDezenas"]
-    ]
+        raise Exception(
+            "Resultado da Lotofácil não encontrado."
+        )
 
     return {
 
-        "concurso": dados["numero"],
+        "concurso": int(
+            item["concurso"]
+        ),
 
         "fixos": sorted(
             random.sample(
-                dezenas,
+                item["listaDezenas"],
                 8
             )
         )
-
     }
 
 # ==========================================================
@@ -791,11 +796,18 @@ def gerar_jogo_inicial(
         timezone.utc
     ).isoformat() 
 
+    data = datetime.now(
+        timezone.utc
+    ).strftime("%Y-%m-%d")
+
+
     item = {
 
         "pk": "JOGO",
 
         "sk": horario,
+
+        "data": data,
 
         "concurso": concurso,
 
@@ -816,10 +828,41 @@ def gerar_jogo_inicial(
     else:
         return None
 
+
+def LimiteDiarioAtingido():
+
+    hoje = datetime.now(
+        timezone.utc
+    ).strftime("%Y-%m-%d")
+
+    response = table.scan()
+
+    jogos = response.get(
+        "Items",
+        []
+    )
+
+    quantidade = len([
+
+        jogo
+
+        for jogo in jogos
+
+        if jogo.get("data") == hoje
+
+    ])
+
+    return quantidade >= 10
+
+
 # ==========================================================
 # ENGINE
 # ==========================================================
 def ExecutarEngine():
+
+    if LimiteDiarioAtingido():
+
+        return None   
 
     dados = (
         buscar_fixos_concurso_anterior()
