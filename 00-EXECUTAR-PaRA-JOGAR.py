@@ -4,6 +4,7 @@ import time
 import importlib
 from contextlib import redirect_stdout
 from datetime import datetime
+import random
 
 from playwright.sync_api import sync_playwright
 
@@ -22,17 +23,17 @@ def gerar():
 
             import EngineDistribuicao
             importlib.reload(EngineDistribuicao)
-
+    
     except SystemExit:
 
         print()
         print("=" * 50)
-        print("FALHA AO GERAR O JOGO")
+        print("NENHUMA COMBINAÇÃO VÁLIDA ENCONTRADA")
         print("=" * 50)
-        print("Execute novamente o gerador (F5).")
+        print("Aguardando nova tentativa...")
 
         return None
-
+    
     saida = buffer.getvalue()
 
     linhas = saida.splitlines()
@@ -157,10 +158,36 @@ if __name__ == "__main__":
         print()
         print("=" * 60)
         print(f"[{horario}] Combinação não encontrada.")
-        print("Nova tentativa em 4 segundos...")
         print("=" * 60)
 
         tentativa += 1
 
-        time.sleep(4)    
-    
+        horario = datetime.now().strftime("%H:%M:%S")
+
+        tempo_espera = random.randint(40, 75)
+
+        print()
+        print("=" * 60)
+        print(f"[{horario}] Nenhum jogo aprovado pelos filtros.")
+        print(f"Aguardando {tempo_espera} segundos para nova tentativa...")
+        print("=" * 60)
+
+        tentativa += 1
+
+        for restante in range(tempo_espera, 0, -1):
+
+            minutos = restante // 60
+            segundos = restante % 60
+
+            print(
+                f"\rPróxima tentativa em {minutos:02d}:{segundos:02d}",
+                end="",
+                flush=True
+            )
+
+            time.sleep(1)
+
+        print()
+        print()
+        print("Iniciando nova tentativa...")
+        time.sleep(1)

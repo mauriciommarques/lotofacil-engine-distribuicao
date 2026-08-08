@@ -9,16 +9,17 @@ import requests
 # PARÂMETROS ESTATÍSTICOS
 # Obtidos através da análise histórica
 # =====================================================
-QTD_PARES = 8
-QTD_IMPARES = 7
+QTD_PARES = 7
+QTD_IMPARES = 8
 
-QTD_CENTRO = 6
 QTD_PRIMOS = 5
 QTD_FIBONACCI = 4
 QTD_MULTIPLOS3 = 5
 QTD_MOLDURA = 9
+QTD_CENTRO = 6
 
-MAX_SEQUENCIA = 5
+MAX_SEQUENCIA = 3
+MAX_QTD_SEQUENCIAS = 2
 
 def carregar_numeros_fixos():
 
@@ -56,6 +57,29 @@ def erro_configuracao(regra, quantidade, maximo):
     print("e execute novamente o gerador.")
 
     exit()
+
+def contar_sequencias_maximas(jogo, tamanho):
+
+    jogo = sorted(jogo)
+
+    quantidade = 0
+    atual = 1
+
+    for i in range(1, len(jogo)):
+
+        if jogo[i] == jogo[i - 1] + 1:
+            atual += 1
+        else:
+
+            if atual == tamanho:
+                quantidade += 1
+
+            atual = 1
+
+    if atual == tamanho:
+        quantidade += 1
+
+    return quantidade    
 
 def maior_sequencia(jogo):
     jogo = sorted(jogo)
@@ -1275,9 +1299,15 @@ print("Quantidade:", len(fib))
 print()
 print("Ainda faltam remover:", EXCESSO_FIB)
 
+qtd_sequencias = contar_sequencias_maximas(resultado, MAX_SEQUENCIA)
+
+status_qtd_sequencias = (
+    qtd_sequencias <= MAX_QTD_SEQUENCIAS
+)
+
 status_sequencia = maior_sequencia(resultado) <= MAX_SEQUENCIA
 
-if not status_sequencia:
+if not status_sequencia or not status_qtd_sequencias:
 
     print()
     print("=" * 50)
@@ -1286,9 +1316,15 @@ if not status_sequencia:
 
     print("Maior sequência encontrada:",
           maior_sequencia(resultado))
-
     print("Máximo permitido:",
           MAX_SEQUENCIA)
+
+    print()
+
+    print("Quantidade de sequências:",
+          qtd_sequencias)
+    print("Máximo permitido:",
+          MAX_QTD_SEQUENCIAS)
 
     exit()
 
@@ -1356,6 +1392,11 @@ print(
     "OK" if status_sequencia else "ERRO"
 )
 
+print(
+    f"Qtd Sequências: {qtd_sequencias} / {MAX_QTD_SEQUENCIAS} ->",
+    "OK" if status_qtd_sequencias else "ERRO"
+)
+
 jogo_valido = all([
     status_fib,
     status_moldura,
@@ -1365,7 +1406,8 @@ jogo_valido = all([
     status_pares,
     status_impares,
     status_total,
-    status_sequencia
+    status_sequencia,
+    status_qtd_sequencias
 ])
 
 print()
