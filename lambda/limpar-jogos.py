@@ -87,3 +87,8 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": str(erro)
         }
+
+
+# # EXECUÇÃO LOCAL
+# if __name__ == "__main__":
+#     LimparTabela()
