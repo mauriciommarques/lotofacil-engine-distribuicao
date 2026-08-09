@@ -215,6 +215,11 @@ def gerar_jogo_inicial(
     ]
 
     if len(pares_disponiveis) < faltam_pares:
+
+        print("[LOTOFACIL] !!! FALHA PARES !!!")
+        print(f"[LOTOFACIL] Pares disponíveis: {pares_disponiveis}")
+        print(f"[LOTOFACIL] Faltam pares: {faltam_pares}")
+
         return None
 
     novos_pares = random.sample(
@@ -235,7 +240,12 @@ def gerar_jogo_inicial(
     ]
 
     if len(impares_disponiveis) < faltam_impares:
-        return None    
+
+        print("[LOTOFACIL] !!! FALHA ÍMPARES !!!")
+        print(f"[LOTOFACIL] Ímpares disponíveis: {impares_disponiveis}")
+        print(f"[LOTOFACIL] Faltam ímpares: {faltam_impares}")
+
+        return None
 
     novos_impares = random.sample(
         impares_disponiveis,
@@ -266,6 +276,12 @@ def gerar_jogo_inicial(
     ]
 
     if len(fib_fixos) > QTD_FIBONACCI:
+
+        print("[LOTOFACIL] !!! FALHA FIBONACCI FIXOS !!!")
+        print(f"[LOTOFACIL] Fibonacci fixos: {fib_fixos}")
+        print(f"[LOTOFACIL] Quantidade: {len(fib_fixos)}")
+        print(f"[LOTOFACIL] Limite: {QTD_FIBONACCI}")
+
         return None
 
 
@@ -477,6 +493,12 @@ def gerar_jogo_inicial(
         ]
 
         if len(centro_fixos) > QTD_CENTRO:
+
+            print("[LOTOFACIL] !!! FALHA CENTRO FIXOS !!!")
+            print(f"[LOTOFACIL] Centro fixos: {centro_fixos}")
+            print(f"[LOTOFACIL] Quantidade: {len(centro_fixos)}")
+            print(f"[LOTOFACIL] Limite: {QTD_CENTRO}")
+
             return None
 
         centro_livres = [
@@ -572,7 +594,13 @@ def gerar_jogo_inicial(
         ]
 
         if len(primos_fixos) > QTD_PRIMOS:
-            return None            
+
+            print("[LOTOFACIL] !!! FALHA PRIMOS FIXOS !!!")
+            print(f"[LOTOFACIL] Primos fixos: {primos_fixos}")
+            print(f"[LOTOFACIL] Quantidade: {len(primos_fixos)}")
+            print(f"[LOTOFACIL] Limite: {QTD_PRIMOS}")
+
+            return None       
 
         primos_livres = [
             n for n in primos_jogo
@@ -667,6 +695,12 @@ def gerar_jogo_inicial(
 
 
         if len(multiplos3_fixos) > QTD_MULTIPLOS3:
+
+            print("[LOTOFACIL] !!! FALHA MÚLTIPLOS 3 FIXOS !!!")
+            print(f"[LOTOFACIL] Múltiplos 3 fixos: {multiplos3_fixos}")
+            print(f"[LOTOFACIL] Quantidade: {len(multiplos3_fixos)}")
+            print(f"[LOTOFACIL] Limite: {QTD_MULTIPLOS3}")
+
             return None
             
         multiplos3_livres = [
@@ -762,7 +796,16 @@ def gerar_jogo_inicial(
 
     status_sequencia = maior_sequencia(resultado) <= MAX_SEQUENCIA
 
+
     if not status_sequencia or not status_qtd_sequencias:
+
+        print("[LOTOFACIL] !!! FALHA SEQUÊNCIAS !!!")
+        print(f"[LOTOFACIL] Jogo: {resultado}")
+        print(f"[LOTOFACIL] Maior sequência: {maior_sequencia(resultado)}")
+        print(f"[LOTOFACIL] Limite sequência: {MAX_SEQUENCIA}")
+        print(f"[LOTOFACIL] Quantidade de sequências: {qtd_sequencias}")
+        print(f"[LOTOFACIL] Limite quantidade: {MAX_QTD_SEQUENCIAS}")
+
         return None
 
 
@@ -791,6 +834,22 @@ def gerar_jogo_inicial(
         status_sequencia,
         status_qtd_sequencias
     ])
+
+    print("==============================================")
+    print("[LOTOFACIL] >>> RAIO-X DA VALIDAÇÃO FINAL <<<")
+    print(f"[LOTOFACIL] JOGO: {resultado}")
+    print(f"[LOTOFACIL] FIB: {len(fib)} / {QTD_FIBONACCI} -> {status_fib}")
+    print(f"[LOTOFACIL] MOLDURA: {len(moldura_jogo)} / {QTD_MOLDURA} -> {status_moldura}")
+    print(f"[LOTOFACIL] CENTRO: {len(centro_jogo)} / {QTD_CENTRO} -> {status_centro}")
+    print(f"[LOTOFACIL] PRIMOS: {len(primos_jogo)} / {QTD_PRIMOS} -> {status_primos}")
+    print(f"[LOTOFACIL] PARES: {len(pares_escolhidos)} / {QTD_PARES} -> {status_pares}")
+    print(f"[LOTOFACIL] IMPARES: {len(impares_escolhidos)} / {QTD_IMPARES} -> {status_impares}")
+    print(f"[LOTOFACIL] MULTIPLOS 3: {len(multiplos3_jogo)} / {QTD_MULTIPLOS3} -> {status_multiplos3}")
+    print(f"[LOTOFACIL] TOTAL: {len(resultado)} / 15 -> {status_total}")
+    print(f"[LOTOFACIL] MAIOR SEQUENCIA: {maior_sequencia(resultado)} / {MAX_SEQUENCIA} -> {status_sequencia}")
+    print(f"[LOTOFACIL] QTD SEQUENCIAS: {qtd_sequencias} / {MAX_QTD_SEQUENCIAS} -> {status_qtd_sequencias}")
+    print(f"[LOTOFACIL] >>> JOGO VALIDO: {jogo_valido} <<<")
+    print("==============================================")    
 
     horario = datetime.now(
         timezone.utc
@@ -824,8 +883,15 @@ def gerar_jogo_inicial(
     }
     
     if jogo_valido:
+
+        print("[LOTOFACIL] >>> JOGO APROVADO <<< ")
+
         return item
+
     else:
+
+        print("[LOTOFACIL] >>> JOGO REPROVADO NA VALIDAÇÃO FINAL <<<")
+
         return None
 
 
@@ -860,13 +926,27 @@ def LimiteDiarioAtingido():
 # ==========================================================
 def ExecutarEngine():
 
+    print("[LOTOFACIL] >>> ENTROU NA ENGINE <<<")
+
+    print("[LOTOFACIL] Verificando limite diário...")
+
     if LimiteDiarioAtingido():
 
-        return None   
+        print("[LOTOFACIL] >>> LIMITE DIÁRIO ATINGIDO <<<")
+
+        return None
+
+    print("[LOTOFACIL] >>> LIMITE DIÁRIO NÃO ATINGIDO <<<")
+
+    print("[LOTOFACIL] Buscando resultado do concurso anterior...")
 
     dados = (
         buscar_fixos_concurso_anterior()
     )
+
+    print("[LOTOFACIL] >>> RESULTADO ANTERIOR ENCONTRADO <<<")
+    print(f"[LOTOFACIL] Concurso: {dados['concurso']}")
+    print(f"[LOTOFACIL] Fixos: {dados['fixos']}")
 
     concurso = (
         dados["concurso"]
@@ -876,18 +956,36 @@ def ExecutarEngine():
         dados["fixos"]
     )
 
+    print("[LOTOFACIL] Montando universo...")
+
     universo = (
         montar_universo(
             numeros_fixos
         )
     )
 
-    return gerar_jogo_inicial(
+    print("[LOTOFACIL] >>> UNIVERSO MONTADO <<<")
+    print(f"[LOTOFACIL] Universo: {universo}")
+    print(f"[LOTOFACIL] Quantidade: {len(universo)}")
+
+    print("[LOTOFACIL] Chamando gerador de jogo...")
+
+    jogo = gerar_jogo_inicial(
         universo,
         numeros_fixos,
         concurso
     )
 
+    if jogo:
+
+        print("[LOTOFACIL] >>> GERADOR RETORNOU UM JOGO <<<")
+        print(f"[LOTOFACIL] Jogo: {jogo['jogo']}")
+
+    else:
+
+        print("[LOTOFACIL] >>> GERADOR RETORNOU NONE <<<")
+
+    return jogo
 # ==========================================================
 # PERSISTÊNCIA
 # ==========================================================
