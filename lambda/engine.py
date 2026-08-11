@@ -23,6 +23,9 @@ MAX_SEQUENCIA = 4
 MAX_QTD_SEQUENCIAS = 2
 TAMANHO_UNIVERSO = 19
 
+MAX_SEQUENCIA_FIXOS = 2
+MAX_TENTATIVAS_FIXOS = 100
+
 
 # ==========================================================
 # CONFIG
@@ -118,19 +121,50 @@ def buscar_fixos_concurso_anterior():
             "Resultado da Lotofácil não encontrado."
         )
 
-    return {
+    for tentativa in range(
+        MAX_TENTATIVAS_FIXOS
+    ):
 
-        "concurso": int(
-            item["concurso"]
-        ),
-
-        "fixos": sorted(
+        fixos = sorted(
             random.sample(
                 item["listaDezenas"],
                 8
             )
         )
-    }
+
+        maior_seq = maior_sequencia(
+            fixos
+        )
+
+        if maior_seq <= MAX_SEQUENCIA_FIXOS:
+
+            print(
+                "[LOTOFACIL] >>> FIXOS APROVADOS <<<"
+            )
+
+            print(
+                f"[LOTOFACIL] Tentativa: {tentativa + 1}"
+            )
+
+            print(
+                f"[LOTOFACIL] Fixos: {fixos}"
+            )
+
+            print(
+                f"[LOTOFACIL] Maior sequência: {maior_seq}"
+            )
+
+            return {
+                "concurso": int(
+                    item["concurso"]
+                ),
+                "fixos": fixos
+            }
+
+    raise Exception(
+        "Não foi possível encontrar "
+        "8 fixos sem sequência acima do limite."
+    )
 
 # ==========================================================
 # UNIVERSO
