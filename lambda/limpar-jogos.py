@@ -89,6 +89,6 @@ def lambda_handler(event, context):
         }
 
 
-# # EXECUÇÃO LOCAL
-# if __name__ == "__main__":
-#     LimparTabela()
+# EXECUÇÃO LOCAL
+if __name__ == "__main__":
+    LimparTabela()
