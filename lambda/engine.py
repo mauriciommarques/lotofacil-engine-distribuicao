@@ -5,7 +5,8 @@ import boto3
 
 import random
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 # ==========================================================
 # CONSTANTES
@@ -165,6 +166,26 @@ def buscar_fixos_concurso_anterior():
         "Não foi possível encontrar "
         "8 fixos sem sequência acima do limite."
     )
+
+def BuscarResultadoBanco():
+
+    response = resultado_table.get_item(
+
+        Key={
+
+            "pk": "LOTOFACIL",
+
+            "sk": "ULTIMO"
+
+        }
+
+    )
+
+    item = response.get(
+        "Item"
+    )
+
+    return item
 
 # ==========================================================
 # UNIVERSO
@@ -885,14 +906,13 @@ def gerar_jogo_inicial(
     print(f"[LOTOFACIL] >>> JOGO VALIDO: {jogo_valido} <<<")
     print("==============================================")    
 
-    horario = datetime.now(
-        timezone.utc
-    ).isoformat() 
+    agora = datetime.now(
+        ZoneInfo("America/Sao_Paulo")
+    )
 
-    data = datetime.now(
-        timezone.utc
-    ).strftime("%Y-%m-%d")
+    horario = agora.isoformat()
 
+    data = agora.strftime("%Y-%m-%d")
 
     item = {
 
@@ -932,7 +952,7 @@ def gerar_jogo_inicial(
 def LimiteDiarioAtingido():
 
     hoje = datetime.now(
-        timezone.utc
+        ZoneInfo("America/Sao_Paulo")
     ).strftime("%Y-%m-%d")
 
     response = table.scan()
@@ -955,6 +975,97 @@ def LimiteDiarioAtingido():
     return quantidade >= 10
 
 
+def ResultadoProntoParaGerar():
+
+    agora = datetime.now(
+        ZoneInfo("America/Sao_Paulo")
+    )
+
+    hoje = agora.date()
+
+    print(
+        f"[LOTOFACIL] Data/hora São Paulo: {agora}"
+    )
+
+    # =====================================================
+    # DOMINGO NÃO GERA JOGOS
+    # =====================================================
+
+    if hoje.weekday() == 6:
+
+        print(
+            "[LOTOFACIL] >>> DOMINGO - GERAÇÃO BLOQUEADA <<<"
+        )
+
+        return False
+
+    # =====================================================
+    # ÚLTIMO RESULTADO ESPERADO
+    # =====================================================
+
+    if hoje.weekday() == 0:
+
+        # Segunda → último sorteio foi sábado
+        data_esperada = hoje - timedelta(days=2)
+
+    else:
+
+        # Terça a sábado → último sorteio foi ontem
+        data_esperada = hoje - timedelta(days=1)
+
+    print(
+        f"[LOTOFACIL] Último resultado esperado: "
+        f"{data_esperada}"
+    )
+
+    # =====================================================
+    # BUSCA RESULTADO NO BANCO
+    # =====================================================
+
+    resultado = BuscarResultadoBanco()
+
+    if not resultado:
+
+        print(
+            "[LOTOFACIL] >>> RESULTADO NÃO EXISTE NO BANCO <<<"
+        )
+
+        return False
+
+    data_resultado = datetime.strptime(
+        resultado["dataApuracao"],
+        "%d/%m/%Y"
+    ).date()
+
+    print(
+        f"[LOTOFACIL] Data resultado DB: "
+        f"{data_resultado}"
+    )
+
+    # =====================================================
+    # VALIDA DATA
+    # =====================================================
+
+    if data_resultado != data_esperada:
+
+        print(
+            "[LOTOFACIL] >>> RESULTADO AINDA NÃO ESTÁ PRONTO <<<"
+        )
+
+        return False
+
+    print(
+        "[LOTOFACIL] >>> RESULTADO CORRETO PARA GERAR <<<"
+    )
+
+    print(
+        f"[LOTOFACIL] Concurso disponível: "
+        f"{resultado['concurso']}"
+    )
+
+    return True
+
+
 # ==========================================================
 # ENGINE
 # ==========================================================
@@ -962,25 +1073,69 @@ def ExecutarEngine():
 
     print("[LOTOFACIL] >>> ENTROU NA ENGINE <<<")
 
-    print("[LOTOFACIL] Verificando limite diário...")
+    # =====================================================
+    # VALIDAR RESULTADO ANTES DE QUALQUER GERAÇÃO
+    # =====================================================
 
-    if LimiteDiarioAtingido():
+    print(
+        "[LOTOFACIL] Verificando se o resultado está pronto..."
+    )
 
-        print("[LOTOFACIL] >>> LIMITE DIÁRIO ATINGIDO <<<")
+    if not ResultadoProntoParaGerar():
+
+        print(
+            "[LOTOFACIL] >>> ENGINE AGUARDANDO NOVO RESULTADO <<<"
+        )
 
         return None
 
-    print("[LOTOFACIL] >>> LIMITE DIÁRIO NÃO ATINGIDO <<<")
+    print(
+        "[LOTOFACIL] >>> RESULTADO PRONTO PARA GERAÇÃO <<<"
+    )
 
-    print("[LOTOFACIL] Buscando resultado do concurso anterior...")
+    # =====================================================
+    # LIMITE DIÁRIO
+    # =====================================================
+
+    print(
+        "[LOTOFACIL] Verificando limite diário..."
+    )
+
+    if LimiteDiarioAtingido():
+
+        print(
+            "[LOTOFACIL] >>> LIMITE DIÁRIO ATINGIDO <<<"
+        )
+
+        return None
+
+    print(
+        "[LOTOFACIL] >>> LIMITE DIÁRIO NÃO ATINGIDO <<<"
+    )
+
+    # =====================================================
+    # RESTANTE DA ENGINE
+    # =====================================================
+
+    print(
+        "[LOTOFACIL] Buscando resultado do concurso anterior..."
+    )
 
     dados = (
         buscar_fixos_concurso_anterior()
     )
 
-    print("[LOTOFACIL] >>> RESULTADO ANTERIOR ENCONTRADO <<<")
-    print(f"[LOTOFACIL] Concurso: {dados['concurso']}")
-    print(f"[LOTOFACIL] Fixos: {dados['fixos']}")
+    print(
+        "[LOTOFACIL] >>> RESULTADO ANTERIOR ENCONTRADO <<<"
+    )
+
+    print(
+        f"[LOTOFACIL] Concurso: {dados['concurso']}"
+    )
+
+    print(
+        f"[LOTOFACIL] Fixos: {dados['fixos']}"
+    )
 
     concurso = (
         dados["concurso"]
@@ -990,7 +1145,9 @@ def ExecutarEngine():
         dados["fixos"]
     )
 
-    print("[LOTOFACIL] Montando universo...")
+    print(
+        "[LOTOFACIL] Montando universo..."
+    )
 
     universo = (
         montar_universo(
@@ -998,11 +1155,21 @@ def ExecutarEngine():
         )
     )
 
-    print("[LOTOFACIL] >>> UNIVERSO MONTADO <<<")
-    print(f"[LOTOFACIL] Universo: {universo}")
-    print(f"[LOTOFACIL] Quantidade: {len(universo)}")
+    print(
+        "[LOTOFACIL] >>> UNIVERSO MONTADO <<<"
+    )
 
-    print("[LOTOFACIL] Chamando gerador de jogo...")
+    print(
+        f"[LOTOFACIL] Universo: {universo}"
+    )
+
+    print(
+        f"[LOTOFACIL] Quantidade: {len(universo)}"
+    )
+
+    print(
+        "[LOTOFACIL] Chamando gerador de jogo..."
+    )
 
     jogo = gerar_jogo_inicial(
         universo,
@@ -1012,14 +1179,23 @@ def ExecutarEngine():
 
     if jogo:
 
-        print("[LOTOFACIL] >>> GERADOR RETORNOU UM JOGO <<<")
-        print(f"[LOTOFACIL] Jogo: {jogo['jogo']}")
+        print(
+            "[LOTOFACIL] >>> GERADOR RETORNOU UM JOGO <<<"
+        )
+
+        print(
+            f"[LOTOFACIL] Jogo: {jogo['jogo']}"
+        )
 
     else:
 
-        print("[LOTOFACIL] >>> GERADOR RETORNOU NONE <<<")
+        print(
+            "[LOTOFACIL] >>> GERADOR RETORNOU NONE <<<"
+        )
 
     return jogo
+
+
 # ==========================================================
 # PERSISTÊNCIA
 # ==========================================================

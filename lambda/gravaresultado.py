@@ -5,6 +5,8 @@
 import json
 import boto3
 import requests
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 # ==========================================================
 # CONFIG
@@ -21,6 +23,32 @@ URL = (
 
 PK = "LOTOFACIL"
 SK = "ULTIMO"
+
+
+def DataUltimoResultadoEsperado():
+
+    agora = datetime.now(
+        ZoneInfo("America/Sao_Paulo")
+    )
+
+    hoje = agora.date()
+
+    # Segunda-feira
+    # Último sorteio foi sábado
+    if hoje.weekday() == 0:
+
+        return hoje - timedelta(days=2)
+
+    # Domingo
+    # Último sorteio também foi sábado
+    if hoje.weekday() == 6:
+
+        return hoje - timedelta(days=1)
+
+    # Terça a sábado
+    # Último sorteio foi ontem
+    return hoje - timedelta(days=1)
+
 
 # ==========================================================
 # DYNAMODB
@@ -116,6 +144,47 @@ def AtualizarResultado():
         BuscarResultadoBanco()
     )
 
+    data_esperada = (
+        DataUltimoResultadoEsperado()
+    )
+
+    data_resultado = datetime.strptime(
+        resultado_online["dataApuracao"],
+        "%d/%m/%Y"
+    ).date()
+
+    print(
+        f"[LOTOFACIL] Data resultado API: "
+        f"{data_resultado}"
+    )
+
+    print(
+        f"[LOTOFACIL] Data resultado esperada: "
+        f"{data_esperada}"
+    )
+
+    # =====================================================
+    # RESULTADO AINDA NÃO É O ESPERADO
+    # =====================================================
+
+    if data_resultado != data_esperada:
+
+        print(
+            "[LOTOFACIL] >>> RESULTADO ESPERADO AINDA NÃO DISPONÍVEL <<<"
+        )
+
+        return {
+
+            "atualizado": False,
+
+            "resultado": resultado_banco
+
+        }
+
+    # =====================================================
+    # RESULTADO ESPERADO JÁ ESTÁ DISPONÍVEL
+    # =====================================================
+
     if resultado_banco:
 
         if (
@@ -123,6 +192,10 @@ def AtualizarResultado():
             ==
             resultado_online["concurso"]
         ):
+
+            print(
+                "[LOTOFACIL] >>> RESULTADO JÁ ESTÁ ATUALIZADO <<<"
+            )
 
             return {
 
@@ -132,8 +205,16 @@ def AtualizarResultado():
 
             }
 
+    # =====================================================
+    # SALVA NOVO RESULTADO
+    # =====================================================
+
     SalvarResultadoBanco(
         resultado_online
+    )
+
+    print(
+        "[LOTOFACIL] >>> NOVO RESULTADO SALVO <<<"
     )
 
     return {
@@ -142,13 +223,25 @@ def AtualizarResultado():
 
         "resultado": resultado_online
 
-    }        
+    }
 
 # ==========================================================
 # LAMBDA
 # ==========================================================
 
 def lambda_handler(event, context):
+
+    data_esperada = DataUltimoResultadoEsperado()
+
+    print(
+        f"[LOTOFACIL] Data/hora São Paulo: "
+        f"{datetime.now(ZoneInfo('America/Sao_Paulo'))}"
+    )
+
+    print(
+        f"[LOTOFACIL] Último resultado esperado: "
+        f"{data_esperada}"
+    )
 
     try:
 
