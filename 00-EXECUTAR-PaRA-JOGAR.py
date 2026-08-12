@@ -87,9 +87,6 @@ def apostar(
 
     print()
 
-    print("DEZENAS:", dezenas)
-    print("TIPO:", type(dezenas))
-
     for numero in dezenas:
 
         numero = int(numero)
@@ -125,6 +122,8 @@ def apostar(
     time.sleep(3)
 
     print("Aposta incluída no carrinho.")
+
+    
         
 # ==========================================================
 # MAIN
@@ -184,10 +183,38 @@ if __name__ == "__main__":
         print("Revise os jogos.")
         print("Remova os que não desejar.")
         print("Finalize a compra.")
-        print("Depois feche o navegador.")
         print("=" * 60)
+
+        resposta = input(
+            "Deseja eliminar os jogos do DynamoDB? (s/n): "
+        ).strip().lower()
+
+        if resposta == "s":
+
+            print()
+            print("Eliminando jogos do DynamoDB...")
+
+            for jogo in jogos:
+
+                table.delete_item(
+                    Key={
+                        "pk": jogo["pk"],
+                        "sk": jogo["sk"]
+                    }
+                )
+
+            print()
+            print("Jogos eliminados com sucesso.")
+
+        else:
+
+            print()
+            print("Jogos mantidos no DynamoDB.")
+
+        print()
+        print("Depois feche o navegador.")
 
         page.wait_for_event(
             "close",
             timeout=0
-        )
+        )        
