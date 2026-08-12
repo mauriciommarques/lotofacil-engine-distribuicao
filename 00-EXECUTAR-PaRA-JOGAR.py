@@ -87,7 +87,12 @@ def apostar(
 
     print()
 
+    print("DEZENAS:", dezenas)
+    print("TIPO:", type(dezenas))
+
     for numero in dezenas:
+
+        numero = int(numero)
 
         texto = f"{numero:02d}"
 
@@ -117,11 +122,9 @@ def apostar(
 
     botao.click()
 
-    page.wait_for_load_state(
-        "networkidle"
-    )
+    time.sleep(3)
 
-    time.sleep(1)
+    print("Aposta incluída no carrinho.")
         
 # ==========================================================
 # MAIN
@@ -153,36 +156,12 @@ if __name__ == "__main__":
         print("Abrindo Sorte Online...")
 
         page.goto(
-            "https://www.sorteonline.com.br/catalogo?lotofacil=true&sort=price:desc"
+            "https://www.sorteonline.com.br/lotofacil/faca-seu-jogo/3760"
         )
 
-        page.wait_for_load_state(
-            "networkidle"
-        )
-
-        time.sleep(1)
+        time.sleep(8)
 
         print("Entrando na Lotofácil...")
-
-        page.get_by_role(
-            "link",
-            name="Lotofácil",
-            exact=True
-        ).click()
-
-        time.sleep(2)
-
-        print("Abrindo volante...")
-
-        botao = page.get_by_role(
-            "button",
-            name="Apostar Agora",
-            exact=True
-        )
-
-        botao.wait_for()
-
-        botao.click()
 
         time.sleep(2)
 
