@@ -36,7 +36,7 @@ REGION = "ap-east-1"
 
 TABLE_NAME = "jogos_lotofacil"
 
-ENGINE = "DISTRIBUICAO"
+ENGINE = "ENGINE-01"
 
 ENGINE_VERSION = "1.0"
 
