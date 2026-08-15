@@ -582,7 +582,7 @@ class LayoutLotofacil:
 
         self.apostar_button = tk.Button(
             footer,
-            text="Apostar jogos selecionados",
+            text="Enviar selecionados para aposta",
             command=self.executar_apostas,
             font=(
                 "Segoe UI",
@@ -1318,7 +1318,7 @@ class LayoutLotofacil:
 
             self.apostar_button.config(
                 state="normal",
-                text="Apostar jogos selecionados"
+                text="Enviar selecionados para aposta"
             )
 
             self.root.update()
