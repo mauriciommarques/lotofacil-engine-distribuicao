@@ -300,6 +300,8 @@ class LayoutLotofacil:
 
         self.selecionados = set()
 
+        self.cards = {}        
+
         self.cards_frame = None
 
         self.montar_tela()
@@ -632,11 +634,14 @@ class LayoutLotofacil:
 
         self.selecionados.clear()
 
+        self.cards.clear()
+
         for widget in (
             self.cards_frame.winfo_children()
         ):
 
             widget.destroy()
+
 
         self.info.config(
             text=(
@@ -696,6 +701,8 @@ class LayoutLotofacil:
             highlightbackground=COR_BORDA,
             highlightthickness=1
         )
+
+        self.cards[indice - 1] = card        
 
         card.pack(
             fill="x",
@@ -919,11 +926,20 @@ class LayoutLotofacil:
         variavel
     ):
 
+        card = self.cards.get(indice)
+
         if variavel.get():
 
             self.selecionados.add(
                 indice
             )
+
+            if card:
+                card.config(
+                    bg="#F1E9FC",
+                    highlightbackground=COR_DESTAQUE,
+                    highlightthickness=2
+                )
 
         else:
 
@@ -931,8 +947,14 @@ class LayoutLotofacil:
                 indice
             )
 
-        self.atualizar_contador()
+            if card:
+                card.config(
+                    bg=COR_CARTAO,
+                    highlightbackground=COR_BORDA,
+                    highlightthickness=1
+                )
 
+        self.atualizar_contador()
 
     # ======================================================
     # CONTADOR
