@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import messagebox
 import boto3
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 
@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 
 REGION = "ap-east-1"
 TABLE_NAME = "jogos_lotofacil"
+TABLE_RESULTADO = "resultado_lotofacil"
 
 COR_DESTAQUE = "#7B3FE4"
 COR_FUNDO = "#F7F5FA"
@@ -35,6 +36,26 @@ dynamodb = boto3.resource(
 )
 
 table = dynamodb.Table(TABLE_NAME)
+resultado_table = dynamodb.Table(
+    TABLE_RESULTADO
+)
+
+# ==========================================================
+# BUSCAR ÚLTIMO RESULTADO
+# ==========================================================
+
+def BuscarResultadoBanco():
+
+    response = resultado_table.get_item(
+
+        Key={
+            "pk": "LOTOFACIL",
+            "sk": "ULTIMO"
+        }
+
+    )
+
+    return response.get("Item")
 
 
 # ==========================================================
@@ -153,6 +174,51 @@ class LayoutLotofacil:
             anchor="w",
             pady=(6, 0)
         )
+
+        # --------------------------------------------------
+        # CONFERÊNCIA DO RESULTADO
+        # --------------------------------------------------
+
+        self.conferencia = tk.Frame(
+            header,
+            bg=COR_CARTAO,
+            highlightbackground=COR_BORDA,
+            highlightthickness=1
+        )
+
+        self.conferencia.pack(
+            fill="x",
+            pady=(12, 0)
+        )
+
+        self.conferencia_titulo = tk.Label(
+            self.conferencia,
+            text="⚠️  CONFERÊNCIA DO RESULTADO",
+            font=("Segoe UI", 11, "bold"),
+            fg=COR_DESTAQUE,
+            bg=COR_CARTAO
+        )
+
+        self.conferencia_titulo.pack(
+            anchor="w",
+            padx=14,
+            pady=(10, 2)
+        )
+
+        self.conferencia_info = tk.Label(
+            self.conferencia,
+            text="Consultando resultado do banco...",
+            font=("Segoe UI", 10),
+            fg=COR_TEXTO,
+            bg=COR_CARTAO,
+            justify="left"
+        )
+
+        self.conferencia_info.pack(
+            anchor="w",
+            padx=14,
+            pady=(0, 10)
+        )        
 
         # --------------------------------------------------
         # BARRA DE AÇÕES
@@ -363,6 +429,172 @@ class LayoutLotofacil:
 
 
     # ======================================================
+    # ATUALIZAR CONFERÊNCIA
+    # ======================================================
+    def atualizar_conferencia(self):
+
+        resultado = BuscarResultadoBanco()
+
+        agora = datetime.now(
+            ZoneInfo("America/Sao_Paulo")
+        )
+
+        hoje = agora.date()
+
+        hoje_formatado = agora.strftime("%d/%m/%Y")
+
+        dias_semana = [
+            "SEGUNDA-FEIRA",
+            "TERÇA-FEIRA",
+            "QUARTA-FEIRA",
+            "QUINTA-FEIRA",
+            "SEXTA-FEIRA",
+            "SÁBADO",
+            "DOMINGO"
+        ]
+
+        dia_semana = dias_semana[
+            agora.weekday()
+        ]
+
+        # ======================================================
+        # DOMINGO
+        # ======================================================
+
+        if agora.weekday() == 6:
+
+            self.conferencia_titulo.config(
+                text="ℹ️  CONFERÊNCIA DO RESULTADO",
+                fg=COR_DESTAQUE
+            )
+
+            self.conferencia_info.config(
+                text=(
+                    f"HOJE:              {hoje_formatado}  •  {dia_semana}\n"
+                    "DOMINGO — GERAÇÃO NÃO DEVE OCORRER."
+                ),
+                fg=COR_TEXTO
+            )
+
+            return
+
+        # ======================================================
+        # BUSCA RESULTADO
+        # ======================================================
+
+        if not resultado:
+
+            self.conferencia_titulo.config(
+                text="🚨  ATENÇÃO — RESULTADO NÃO ENCONTRADO",
+                fg="#B3261E"
+            )
+
+            self.conferencia_info.config(
+                text=(
+                    f"HOJE:              {hoje_formatado}  •  {dia_semana}\n"
+                    "NÃO FOI ENCONTRADO RESULTADO NO BANCO.\n"
+                    "🚨 NÃO JOGAR."
+                ),
+                fg="#B3261E"
+            )
+
+            return
+
+        # ======================================================
+        # DATA DO RESULTADO NO BANCO
+        # ======================================================
+
+        data_resultado = datetime.strptime(
+            resultado["dataApuracao"],
+            "%d/%m/%Y"
+        ).date()
+
+        # ======================================================
+        # ÚLTIMO SORTEIO ESPERADO
+        #
+        # Domingo teve sorteio.
+        # Portanto:
+        # Segunda → domingo
+        # Terça a sábado → dia anterior
+        # ======================================================
+
+        data_esperada = hoje - timedelta(days=1)
+
+        data_esperada_formatada = data_esperada.strftime(
+            "%d/%m/%Y"
+        )
+
+        # ======================================================
+        # RESULTADO CORRETO
+        # ======================================================
+
+        if data_resultado == data_esperada:
+
+            self.conferencia_titulo.config(
+                text="✅  CONFERÊNCIA DO RESULTADO — OK",
+                fg="#137333"
+            )
+
+            self.conferencia_info.config(
+                text=(
+                    f"HOJE:              {hoje_formatado}  •  {dia_semana}\n"
+                    f"ÚLTIMO SORTEIO:    {data_esperada_formatada}\n"
+                    f"CONCURSO NO DB:    {resultado.get('concurso', '-')}\n"
+                    f"DATA DO RESULTADO: {resultado.get('dataApuracao', '-')}\n"
+                    "\n"
+                    "✅ RESULTADO COMPATÍVEL COM HOJE."
+                ),
+                fg="#137333"
+            )
+
+        # ======================================================
+        # RESULTADO ATRASADO
+        # ======================================================
+
+        elif data_resultado < data_esperada:
+
+            self.conferencia_titulo.config(
+                text="🚨  ATENÇÃO — RESULTADO DESATUALIZADO",
+                fg="#B3261E"
+            )
+
+            self.conferencia_info.config(
+                text=(
+                    f"HOJE:              {hoje_formatado}  •  {dia_semana}\n"
+                    f"ÚLTIMO SORTEIO:    {data_esperada_formatada}\n"
+                    f"CONCURSO NO DB:    {resultado.get('concurso', '-')}\n"
+                    f"DATA DO RESULTADO: {resultado.get('dataApuracao', '-')}\n"
+                    "\n"
+                    "🚨 NÃO JOGAR — BANCO NÃO ESTÁ ATUALIZADO."
+                ),
+                fg="#B3261E"
+            )
+
+        # ======================================================
+        # DATA FUTURA / INCONSISTENTE
+        # ======================================================
+
+        else:
+
+            self.conferencia_titulo.config(
+                text="⚠️  ATENÇÃO — DATA INCONSISTENTE",
+                fg="#B3261E"
+            )
+
+            self.conferencia_info.config(
+                text=(
+                    f"HOJE:              {hoje_formatado}  •  {dia_semana}\n"
+                    f"ÚLTIMO SORTEIO:    {data_esperada_formatada}\n"
+                    f"CONCURSO NO DB:    {resultado.get('concurso', '-')}\n"
+                    f"DATA DO RESULTADO: {resultado.get('dataApuracao', '-')}\n"
+                    "\n"
+                    "⚠️ DATA DO BANCO NÃO CONDIZ COM O DIA ATUAL."
+                ),
+                fg="#B3261E"
+            )
+
+
+    # ======================================================
     # JOGOS
     # ======================================================
 
@@ -371,6 +603,8 @@ class LayoutLotofacil:
         try:
 
             self.jogos = BuscarJogos()
+
+            self.atualizar_conferencia()
 
         except Exception as erro:
 
