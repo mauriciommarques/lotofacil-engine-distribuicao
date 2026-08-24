@@ -20,9 +20,9 @@ QTD_MULTIPLOS3 = 5
 QTD_MOLDURA = 9
 QTD_CENTRO = 6
 
-MAX_SEQUENCIA = 4
-MAX_QTD_SEQUENCIAS = 1
 TAMANHO_MINIMO_SEQUENCIA = 3
+MAX_QTD_SEQUENCIAS = 3
+MAX_SEQUENCIA = 5
 
 TAMANHO_UNIVERSO = 19
 
@@ -38,7 +38,7 @@ REGION = "ap-east-1"
 
 TABLE_NAME = "jogos_lotofacil"
 
-ENGINE = "ENGINE-01"
+ENGINE = "ENGINE"
 
 ENGINE_VERSION = "1.0"
 
@@ -1048,7 +1048,7 @@ def ResultadoProntoParaGerar():
     # VALIDA DATA
     # =====================================================
 
-    if data_resultado != data_esperada:
+    if data_resultado < data_esperada:
 
         print(
             "[LOTOFACIL] >>> RESULTADO AINDA NÃO ESTÁ PRONTO <<<"
