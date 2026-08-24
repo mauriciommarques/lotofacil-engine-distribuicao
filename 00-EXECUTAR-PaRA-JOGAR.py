@@ -695,12 +695,27 @@ class LayoutLotofacil:
         jogo
     ):
 
+
+        engine = jogo.get(
+            "engine",
+            "-"
+        )
+
+        if engine == "ENGINE":
+            cor_borda = COR_DESTAQUE
+            espessura_borda = 2
+            fundo_card = "#F8F3FF"
+        else:
+            cor_borda = COR_BORDA
+            espessura_borda = 1
+            fundo_card = COR_CARTAO
+
         card = tk.Frame(
             self.cards_frame,
-            bg=COR_CARTAO,
-            highlightbackground=COR_BORDA,
-            highlightthickness=1
-        )
+            bg=fundo_card,
+            highlightbackground=cor_borda,
+            highlightthickness=espessura_borda
+        )        
 
         self.cards[indice - 1] = card        
 
@@ -777,22 +792,58 @@ class LayoutLotofacil:
             "-"
         )
 
+
+        # --------------------------------------------------
+        # IDENTIFICAÇÃO DA ENGINE
+        # --------------------------------------------------
+
+        if engine == "ENGINE":
+            texto_engine = "★ ENGINE 1 • ORIGINAL"
+            cor_engine = COR_DESTAQUE
+            fonte_engine = (
+                "Segoe UI",
+                11,
+                "bold"
+            )
+
+        elif engine == "ENGINE-02":
+            texto_engine = "ENGINE 2"
+            cor_engine = "#665B73"
+            fonte_engine = (
+                "Segoe UI",
+                10,
+                "bold"
+            )
+
+        elif engine == "ENGINE-03":
+            texto_engine = "ENGINE 3"
+            cor_engine = "#665B73"
+            fonte_engine = (
+                "Segoe UI",
+                10,
+                "bold"
+            )
+
+        else:
+            texto_engine = f"ENGINE: {engine}"
+            cor_engine = "#665B73"
+            fonte_engine = (
+                "Segoe UI",
+                10
+            )
+
         tk.Label(
             topo,
             text=(
                 f"Concurso: {concurso}"
-                f"   •   Engine: {engine}"
+                f"   •   {texto_engine}"
             ),
-            font=(
-                "Segoe UI",
-                10
-            ),
-            fg="#665B73",
+            font=fonte_engine,
+            fg=cor_engine,
             bg=COR_CARTAO
         ).pack(
             side="left"
-        )
-
+        )        
 
         # --------------------------------------------------
         # GRADE DE DEZENAS
