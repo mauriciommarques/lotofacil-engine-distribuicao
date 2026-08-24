@@ -21,7 +21,9 @@ QTD_MOLDURA = 9
 QTD_CENTRO = 6
 
 MAX_SEQUENCIA = 4
-MAX_QTD_SEQUENCIAS = 2
+MAX_QTD_SEQUENCIAS = 1
+TAMANHO_MINIMO_SEQUENCIA = 3
+
 TAMANHO_UNIVERSO = 19
 
 MAX_SEQUENCIA_FIXOS = 2
@@ -74,7 +76,7 @@ def maior_sequencia(jogo):
 
     return maior    
 
-def contar_sequencias_maximas(jogo, tamanho):
+def contar_sequencias(jogo):
 
     jogo = sorted(jogo)
 
@@ -84,18 +86,19 @@ def contar_sequencias_maximas(jogo, tamanho):
     for i in range(1, len(jogo)):
 
         if jogo[i] == jogo[i - 1] + 1:
-            atual += 1
-        else:
 
-            if atual == tamanho:
+            atual += 1
+
+        else:
+            if atual >= TAMANHO_MINIMO_SEQUENCIA:
                 quantidade += 1
 
             atual = 1
 
-    if atual == tamanho:
+    if atual >= TAMANHO_MINIMO_SEQUENCIA:
         quantidade += 1
 
-    return quantidade    
+    return quantidade
 
 # ==========================================================
 # OBTER RESULTADO
@@ -841,16 +844,15 @@ def gerar_jogo_inicial(
                 len(multiplos3_jogo) - QTD_MULTIPLOS3
             )  
             
-                
-
-    qtd_sequencias = contar_sequencias_maximas(resultado, MAX_SEQUENCIA)
+    qtd_sequencias = contar_sequencias(resultado)
 
     status_qtd_sequencias = (
         qtd_sequencias <= MAX_QTD_SEQUENCIAS
     )
 
-    status_sequencia = maior_sequencia(resultado) <= MAX_SEQUENCIA
-
+    status_sequencia = (
+        maior_sequencia(resultado) <= MAX_SEQUENCIA
+    )                
 
     if not status_sequencia or not status_qtd_sequencias:
 
