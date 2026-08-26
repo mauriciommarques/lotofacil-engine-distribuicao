@@ -20,9 +20,11 @@ QTD_MULTIPLOS3 = 5
 QTD_MOLDURA = 9
 QTD_CENTRO = 6
 
-TAMANHO_MINIMO_SEQUENCIA = 3
+
 MAX_QTD_SEQUENCIAS = 3
 MAX_SEQUENCIA = 5
+TAMANHO_MINIMO_SEQUENCIA = 3
+
 
 TAMANHO_UNIVERSO = 19
 
@@ -37,6 +39,8 @@ MAX_TENTATIVAS_FIXOS = 100
 REGION = "ap-east-1"
 
 TABLE_NAME = "jogos_lotofacil"
+
+TABLE_ESTATISTICA = "estatistica_lotofacil"
 
 ENGINE = "ENGINE"
 
@@ -60,6 +64,38 @@ table = dynamodb.Table(
 resultado_table = dynamodb.Table(
     TABLE_RESULTADO
 )
+
+estatistica_table = dynamodb.Table(
+    TABLE_ESTATISTICA
+)
+
+def LimiteEngineAtingido():
+
+    hoje = datetime.now(
+        ZoneInfo("America/Sao_Paulo")
+    ).strftime("%Y-%m-%d")
+
+    response = table.scan()
+
+    jogos = response.get(
+        "Items",
+        []
+    )
+
+    quantidade = len([
+
+        jogo
+
+        for jogo in jogos
+
+        if (
+            jogo.get("data") == hoje
+            and jogo.get("engine") == ENGINE
+        )
+
+    ])
+
+    return quantidade >= 5
 
 def maior_sequencia(jogo):
     jogo = sorted(jogo)
@@ -1111,6 +1147,26 @@ def ExecutarEngine():
 
         return None
 
+    # =====================================================
+    # LIMITE DA ENGINE
+    # =====================================================
+
+    print(
+        f"[LOTOFACIL] Verificando limite da {ENGINE}..."
+    )
+
+    if LimiteEngineAtingido():
+
+        print(
+            f"[LOTOFACIL] >>> LIMITE DA {ENGINE} ATINGIDO <<<"
+        )
+
+        return None
+
+    print(
+        f"[LOTOFACIL] >>> LIMITE DA {ENGINE} NÃO ATINGIDO <<<"
+    )    
+
     print(
         "[LOTOFACIL] >>> LIMITE DIÁRIO NÃO ATINGIDO <<<"
     )
@@ -1201,6 +1257,76 @@ def ExecutarEngine():
 # ==========================================================
 # PERSISTÊNCIA
 # ==========================================================
+def SalvarEstatistica(item):
+
+    agora = datetime.now(
+        ZoneInfo("America/Sao_Paulo")
+    )
+
+    estatistica = {
+
+        "pk": "ESTATISTICA",
+
+        "sk": agora.isoformat(),
+
+        "data": agora.strftime("%Y-%m-%d"),
+
+        "concurso": item["concurso"],
+
+        "engine": item["engine"],
+
+        "engine_version": item["engine_version"],
+
+        "quantidade_primos": len([
+            n for n in item["jogo"]
+            if n in {2, 3, 5, 7, 11, 13, 17, 19, 23}
+        ]),
+
+        "quantidade_pares": len([
+            n for n in item["jogo"]
+            if n % 2 == 0
+        ]),
+
+        "quantidade_fibonacci": len([
+            n for n in item["jogo"]
+            if n in {1, 2, 3, 5, 8, 13, 21}
+        ]),
+
+        "quantidade_multiplos3": len([
+            n for n in item["jogo"]
+            if n % 3 == 0
+        ]),
+
+        "quantidade_moldura": len([
+            n for n in item["jogo"]
+            if n in {
+                1, 2, 3, 4, 5, 6,
+                10, 11, 15, 16,
+                20, 21, 22, 23, 24, 25
+            }
+        ]),
+
+        "quantidade_centro": len([
+            n for n in item["jogo"]
+            if n in {12, 13, 14, 17, 18, 19}
+        ]),
+
+        "quantidade_sequencias": contar_sequencias(
+            item["jogo"]
+        ),
+
+        "maior_sequencia": maior_sequencia(
+            item["jogo"]
+        ),
+
+        "quantidade_total": len(
+            item["jogo"]
+        )
+    }
+
+    estatistica_table.put_item(
+        Item=estatistica
+    )
 
 def SalvarJogo(item):
 
@@ -1232,6 +1358,10 @@ def lambda_handler(event, context):
             SalvarJogo(
                 jogo
             )
+
+            SalvarEstatistica(
+                    jogo
+                )
 
             return {
 
