@@ -42,7 +42,7 @@ TABLE_NAME = "jogos_lotofacil"
 
 TABLE_ESTATISTICA = "estatistica_lotofacil"
 
-ENGINE = "ENGINE"
+ENGINE = "ENGINE-03"
 
 ENGINE_VERSION = "1.0"
 
@@ -1010,7 +1010,7 @@ def LimiteDiarioAtingido():
 
     ])
 
-    return quantidade >= 10
+    return quantidade > 15
 
 
 def ResultadoProntoParaGerar():
