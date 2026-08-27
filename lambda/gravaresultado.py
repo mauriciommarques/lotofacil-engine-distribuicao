@@ -64,6 +64,7 @@ def maior_sequencia(jogo):
         if jogo[i] == jogo[i - 1] + 1:
 
             atual += 1
+
             maior = max(
                 maior,
                 atual
@@ -80,7 +81,8 @@ def contar_sequencias(jogo):
 
     jogo = sorted(jogo)
 
-    quantidade = 0
+    sequencias = {}
+
     atual = 1
 
     for i in range(1, len(jogo)):
@@ -91,18 +93,41 @@ def contar_sequencias(jogo):
 
         else:
 
-            if atual >= 3:
+            if atual >= 2:
 
-                quantidade += 1
+                for tamanho in range(
+                    2,
+                    atual + 1
+                ):
+
+                    sequencias[tamanho] = (
+                        sequencias.get(
+                            tamanho,
+                            0
+                        ) + 1
+                    )
 
             atual = 1
 
-    if atual >= 3:
+    # ======================================================
+    # ÚLTIMO BLOCO
+    # ======================================================
 
-        quantidade += 1
+    if atual >= 2:
 
-    return quantidade
+        for tamanho in range(
+            2,
+            atual + 1
+        ):
 
+            sequencias[tamanho] = (
+                sequencias.get(
+                    tamanho,
+                    0
+                ) + 1
+            )
+
+    return sequencias
 
 
 # ==========================================================
@@ -121,6 +146,7 @@ table = dynamodb.Table(
 estatistica_table = dynamodb.Table(
     TABLE_ESTATISTICA
 )
+
 
 # ==========================================================
 # RESULTADO ONLINE
@@ -148,11 +174,15 @@ def BuscarResultadoLotoFacilOnline():
         "dataApuracao": dados["data"],
 
         "listaDezenas": [
+
             int(n)
+
             for n in dados["dezenas"]
+
         ]
 
     }
+
 
 # ==========================================================
 # PERSISTÊNCIA
@@ -187,7 +217,8 @@ def BuscarResultadoBanco():
         "Item"
     )
 
-    return item 
+    return item
+
 
 # ==========================================================
 # ESTATÍSTICA DO CONCURSO
@@ -232,7 +263,15 @@ def SalvarEstatisticaConcurso(resultado):
         17, 18, 19
     }
 
+    # ======================================================
+    # ORDENAÇÃO
+    # ======================================================
+
     jogo_ordenado = sorted(jogo)
+
+    # ======================================================
+    # SEQUÊNCIAS
+    # ======================================================
 
     quantidade_sequencias = contar_sequencias(
         jogo_ordenado
@@ -241,6 +280,10 @@ def SalvarEstatisticaConcurso(resultado):
     maior_seq = maior_sequencia(
         jogo_ordenado
     )
+
+    # ======================================================
+    # ESTATÍSTICA
+    # ======================================================
 
     estatistica = {
 
@@ -256,49 +299,158 @@ def SalvarEstatisticaConcurso(resultado):
             resultado["dataApuracao"]
         ),
 
+        # ==================================================
+        # PARES / ÍMPARES
+        # ==================================================
+
         "quantidade_pares": len([
+
             n for n in jogo
+
             if n in pares
+
         ]),
 
         "quantidade_impares": len([
+
             n for n in jogo
+
             if n in impares
+
         ]),
+
+        # ==================================================
+        # PRIMOS
+        # ==================================================
 
         "quantidade_primos": len([
+
             n for n in jogo
+
             if n in primos
+
         ]),
+
+        # ==================================================
+        # FIBONACCI
+        # ==================================================
 
         "quantidade_fibonacci": len([
+
             n for n in jogo
+
             if n in fibonacci
+
         ]),
+
+        # ==================================================
+        # MÚLTIPLOS DE 3
+        # ==================================================
 
         "quantidade_multiplos3": len([
+
             n for n in jogo
+
             if n in multiplos3
+
         ]),
+
+        # ==================================================
+        # MOLDURA
+        # ==================================================
 
         "quantidade_moldura": len([
+
             n for n in jogo
+
             if n in moldura
+
         ]),
+
+        # ==================================================
+        # CENTRO
+        # ==================================================
 
         "quantidade_centro": len([
+
             n for n in jogo
+
             if n in centro
+
         ]),
 
-        "quantidade_sequencias": (
-            quantidade_sequencias
+        # ==================================================
+        # SEQUÊNCIAS
+        # ==================================================
+
+        "quantidade_sequencias_2": (
+            quantidade_sequencias.get(
+                2,
+                0
+            )
         ),
+
+        "quantidade_sequencias_3": (
+            quantidade_sequencias.get(
+                3,
+                0
+            )
+        ),
+
+        "quantidade_sequencias_4": (
+            quantidade_sequencias.get(
+                4,
+                0
+            )
+        ),
+
+        "quantidade_sequencias_5": (
+            quantidade_sequencias.get(
+                5,
+                0
+            )
+        ),
+
+        "quantidade_sequencias_6": (
+            quantidade_sequencias.get(
+                6,
+                0
+            )
+        ),
+
+        "quantidade_sequencias_7": (
+            quantidade_sequencias.get(
+                7,
+                0
+            )
+        ),
+
+        "quantidade_sequencias_8": (
+            quantidade_sequencias.get(
+                8,
+                0
+            )
+        ),
+
+        "quantidade_sequencias_9": (
+            quantidade_sequencias.get(
+                9,
+                0
+            )
+        ),
+
+        # ==================================================
+        # MAIOR SEQUÊNCIA
+        # ==================================================
 
         "maior_sequencia": (
             maior_seq
         )
     }
+
+    # ======================================================
+    # SALVA NO DYNAMODB
+    # ======================================================
 
     estatistica_table.put_item(
         Item=estatistica
@@ -306,7 +458,8 @@ def SalvarEstatisticaConcurso(resultado):
 
     print(
         "[LOTOFACIL] >>> ESTATÍSTICA DO CONCURSO SALVA <<<"
-    )   
+    )
+
 
 # ==========================================================
 # ATUALIZAÇÃO
@@ -341,14 +494,15 @@ def AtualizarResultado():
         f"{data_esperada}"
     )
 
-    # =====================================================
+    # ======================================================
     # RESULTADO AINDA NÃO É O ESPERADO
-    # =====================================================
+    # ======================================================
 
     if data_resultado != data_esperada:
 
         print(
-            "[LOTOFACIL] >>> RESULTADO ESPERADO AINDA NÃO DISPONÍVEL <<<"
+            "[LOTOFACIL] >>> RESULTADO ESPERADO "
+            "AINDA NÃO DISPONÍVEL <<<"
         )
 
         return {
@@ -359,9 +513,9 @@ def AtualizarResultado():
 
         }
 
-    # =====================================================
+    # ======================================================
     # RESULTADO ESPERADO JÁ ESTÁ DISPONÍVEL
-    # =====================================================
+    # ======================================================
 
     if resultado_banco:
 
@@ -372,7 +526,8 @@ def AtualizarResultado():
         ):
 
             print(
-                "[LOTOFACIL] >>> RESULTADO JÁ ESTÁ ATUALIZADO <<<"
+                "[LOTOFACIL] >>> RESULTADO "
+                "JÁ ESTÁ ATUALIZADO <<<"
             )
 
             return {
@@ -383,9 +538,9 @@ def AtualizarResultado():
 
             }
 
-    # =====================================================
+    # ======================================================
     # SALVA NOVO RESULTADO
-    # =====================================================
+    # ======================================================
 
     SalvarResultadoBanco(
         resultado_online
@@ -407,13 +562,16 @@ def AtualizarResultado():
 
     }
 
+
 # ==========================================================
 # LAMBDA
 # ==========================================================
 
 def lambda_handler(event, context):
 
-    data_esperada = DataUltimoResultadoEsperado()
+    data_esperada = (
+        DataUltimoResultadoEsperado()
+    )
 
     print(
         f"[LOTOFACIL] Data/hora São Paulo: "
@@ -450,7 +608,6 @@ def lambda_handler(event, context):
             "body": json.dumps({
 
                 "mensagem": mensagem,
-
 
                 "concurso": int(
                     atualizacao["resultado"]["concurso"]

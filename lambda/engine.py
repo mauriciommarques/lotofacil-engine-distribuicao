@@ -42,7 +42,7 @@ TABLE_NAME = "jogos_lotofacil"
 
 TABLE_ESTATISTICA = "estatistica_lotofacil"
 
-ENGINE = "ENGINE-03"
+ENGINE = "ENGINE-01"
 
 ENGINE_VERSION = "1.0"
 
