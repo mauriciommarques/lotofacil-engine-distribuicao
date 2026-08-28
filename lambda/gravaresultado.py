@@ -23,6 +23,11 @@ URL = (
     "api/lotofacil/latest"
 )
 
+lambda_client = boto3.client(
+    "lambda",
+    region_name=REGION
+)
+
 PK = "LOTOFACIL"
 SK = "ULTIMO"
 
@@ -50,6 +55,33 @@ def DataUltimoResultadoEsperado():
     # Terça a sábado
     # Último sorteio foi ontem
     return hoje - timedelta(days=1)
+
+# ==========================================================
+# ATUALIZAR ESTATÍSTICA
+# ==========================================================
+
+def ChamarAtualizaEstatistica():
+
+    print()
+    print("=" * 60)
+    print("CHAMANDO ATUALIZA-ESTATISTICA")
+    print("=" * 60)
+
+    response = lambda_client.invoke(
+
+        FunctionName="Atualiza-Estatistica",
+
+        InvocationType="RequestResponse",
+
+        Payload=b"{}"
+
+    )
+
+    print(
+        "[LOTOFACIL] >>> ATUALIZA-ESTATISTICA EXECUTADA <<<"
+    )
+
+    return response
 
 
 def maior_sequencia(jogo):
@@ -549,6 +581,8 @@ def AtualizarResultado():
     SalvarEstatisticaConcurso(
         resultado_online
     )
+
+    ChamarAtualizaEstatistica()
 
     print(
         "[LOTOFACIL] >>> NOVO RESULTADO SALVO <<<"

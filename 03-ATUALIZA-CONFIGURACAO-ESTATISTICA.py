@@ -142,6 +142,15 @@ def AnalisarIndicadores(
 
     )
 
+
+    concurso_referencia = int(
+        concursos[0]["concurso"]
+    )
+
+    data_referencia = concursos[0].get(
+        "dataApuracao"
+    )
+
     print(
         f"[LOTOFACIL] Concursos carregados: "
         f"{len(concursos)}"
@@ -449,6 +458,16 @@ def AnalisarIndicadores(
     parametros = {
 
         # ------------------------------------------------------
+        # CONTROLE DA ATUALIZAÇÃO
+        # ------------------------------------------------------
+
+        "concurso_atualizado":
+            concurso_referencia,
+
+        "dataApuracao":
+            data_referencia,
+
+        # ------------------------------------------------------
         # CALCULADOS PELA ANÁLISE
         # ------------------------------------------------------
 
@@ -496,19 +515,29 @@ def AnalisarIndicadores(
 
         "MAX_SEQUENCIA_FIXOS":
             MAX_SEQUENCIA_FIXOS
-    }
+    }    
 
     # ======================================================
     # RESUMO
     # ======================================================
 
     print()
+    
     print(
         "=========================================================="
     )
     print(
         "[LOTOFACIL] >>> PARÂMETROS CALCULADOS <<<"
     )
+
+    print(
+        f"Concurso de referência: {concurso_referencia}"
+    )
+
+    print(
+        f"Data de apuração: {data_referencia}"
+    )
+
     print(
         "=========================================================="
     )
