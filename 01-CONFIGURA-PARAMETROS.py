@@ -6,7 +6,7 @@ import boto3
 
 
 # ==========================================================
-# CONFIG
+# CONFIGURAÇÃO
 # ==========================================================
 
 REGION = "ap-east-1"
@@ -16,6 +16,7 @@ TABLE_NAME = "parametrossistema"
 PK = "LOTOFACIL"
 
 SK = "PARAMETROS"
+
 
 # ==========================================================
 # PARÂMETROS DO SISTEMA
@@ -70,7 +71,34 @@ table = dynamodb.Table(
 
 
 # ==========================================================
-# SALVAR PARÂMETROS
+# REMOVER CONFIGURAÇÃO ANTERIOR
+# ==========================================================
+
+def LimparParametros():
+
+    print(
+        "[LOTOFACIL] >>> REMOVENDO CONFIGURAÇÃO ANTERIOR <<<"
+    )
+
+    table.delete_item(
+
+        Key={
+
+            "pk": PK,
+
+            "sk": SK
+
+        }
+
+    )
+
+    print(
+        "[LOTOFACIL] >>> CONFIGURAÇÃO ANTERIOR REMOVIDA <<<"
+    )
+
+
+# ==========================================================
+# SALVAR NOVA CONFIGURAÇÃO
 # ==========================================================
 
 def SalvarParametros():
@@ -86,11 +114,89 @@ def SalvarParametros():
     }
 
     table.put_item(
+
         Item=item
+
     )
 
     print(
-        "[LOTOFACIL] >>> PARÂMETROS DO SISTEMA SALVOS <<<"
+        "[LOTOFACIL] >>> NOVA CONFIGURAÇÃO SALVA <<<"
+    )
+
+
+# ==========================================================
+# VALIDAR CONFIGURAÇÃO GRAVADA
+# ==========================================================
+
+def ValidarParametros():
+
+    response = table.get_item(
+
+        Key={
+
+            "pk": PK,
+
+            "sk": SK
+
+        }
+
+    )
+
+    item = response.get(
+        "Item"
+    )
+
+    if not item:
+
+        raise Exception(
+            "Configuração não encontrada após gravação."
+        )
+
+    print()
+    print(
+        "=========================================================="
+    )
+    print(
+        "[LOTOFACIL] >>> CONFIGURAÇÃO CONFIRMADA NO DYNAMODB <<<"
+    )
+    print(
+        "=========================================================="
+    )
+
+    print(
+        f"PK: {item.get('pk')}"
+    )
+
+    print(
+        f"SK: {item.get('sk')}"
+    )
+
+    print()
+
+    for nome, valor_esperado in PARAMETROS.items():
+
+        valor_gravado = item.get(
+            nome
+        )
+
+        if valor_gravado != valor_esperado:
+
+            raise Exception(
+                f"Parâmetro {nome} divergente. "
+                f"Esperado: {valor_esperado} | "
+                f"Gravado: {valor_gravado}"
+            )
+
+        print(
+            f"{nome}: {valor_gravado} ✓"
+        )
+
+    print()
+    print(
+        "[LOTOFACIL] >>> TODOS OS PARÂMETROS CONFIRMADOS <<<"
+    )
+    print(
+        "=========================================================="
     )
 
 
@@ -102,15 +208,36 @@ if __name__ == "__main__":
 
     try:
 
+        # --------------------------------------------------
+        # 1. REMOVE A CONFIGURAÇÃO ANTERIOR
+        # --------------------------------------------------
+
+        LimparParametros()
+
+        # --------------------------------------------------
+        # 2. GRAVA A NOVA CONFIGURAÇÃO
+        # --------------------------------------------------
+
         SalvarParametros()
 
+        # --------------------------------------------------
+        # 3. LÊ NOVAMENTE E CONFIRMA
+        # --------------------------------------------------
+
+        ValidarParametros()
+
+        # --------------------------------------------------
+        # CONCLUÍDO
+        # --------------------------------------------------
+
+        print()
         print(
-            "[LOTOFACIL] >>> CONCLUÍDO <<<"
+            "[LOTOFACIL] >>> CONFIGURAÇÃO APLICADA COM SUCESSO <<<"
         )
 
     except Exception as erro:
 
+        print()
         print(
             f"[LOTOFACIL] >>> ERRO: {erro} <<<"
         )
-
