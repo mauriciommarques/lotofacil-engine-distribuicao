@@ -37,6 +37,74 @@ parametros_table = dynamodb.Table(
     TABLE_PARAMETROS
 )
 
+def ValidarParametrosAtualizados():
+
+    parametros = BuscarParametrosSistema()
+
+    resultado = BuscarResultadoBanco()
+
+    if not resultado:
+
+        raise Exception(
+            "Resultado da Lotofácil não encontrado."
+        )
+
+    concurso_parametros = int(
+        parametros["concurso_atualizado"]
+    )
+
+    concurso_resultado = int(
+        resultado["concurso"]
+    )
+
+    data_parametros = parametros["dataApuracao"]
+
+    data_resultado = resultado["dataApuracao"]
+
+    print(
+        "[LOTOFACIL] >>> VALIDANDO PARÂMETROS DO SISTEMA <<<"
+    )
+
+    print(
+        f"[LOTOFACIL] Concurso parâmetros: "
+        f"{concurso_parametros}"
+    )
+
+    print(
+        f"[LOTOFACIL] Concurso resultado: "
+        f"{concurso_resultado}"
+    )
+
+    print(
+        f"[LOTOFACIL] Data parâmetros: "
+        f"{data_parametros}"
+    )
+
+    print(
+        f"[LOTOFACIL] Data resultado: "
+        f"{data_resultado}"
+    )
+
+    if concurso_parametros != concurso_resultado:
+
+        raise Exception(
+            "Parâmetros do sistema não estão "
+            "atualizados para o último concurso."
+        )
+
+    if data_parametros != data_resultado:
+
+        raise Exception(
+            "Data dos parâmetros não corresponde "
+            "à data do último resultado."
+        )
+
+    print(
+        "[LOTOFACIL] >>> PARÂMETROS ATUALIZADOS <<<"
+    )
+
+    return True
+
 
 def BuscarParametrosSistema():
 
@@ -165,6 +233,15 @@ def CarregarParametrosSistema():
     global MAX_SEQUENCIA_FIXOS
 
     PARAMETROS = BuscarParametrosSistema()
+
+    if not ValidarParametrosAtualizados():
+
+        print(
+            "[LOTOFACIL] >>> PARÂMETROS NÃO ATUALIZADOS <<<"
+        )
+
+        return None
+    
 
     QTD_PARES = int(
         PARAMETROS["QTD_PARES"]

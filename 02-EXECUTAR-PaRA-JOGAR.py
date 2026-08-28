@@ -29,7 +29,7 @@ PLAYWRIGHT_USER_DATA = (
 
 URL_LOTOFACIL = (
     "https://www.sorteonline.com.br/"
-    "lotofacil/faca-seu-jogo/3773"
+    "lotofacil/faca-seu-jogo/3774"
 )
 
 
