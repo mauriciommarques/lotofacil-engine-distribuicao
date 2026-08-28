@@ -798,11 +798,11 @@ class LayoutLotofacil:
         # --------------------------------------------------
 
         if engine == "ENGINE":
-            texto_engine = "★ ENGINE 1 • ORIGINAL"
-            cor_engine = COR_DESTAQUE
+            texto_engine = "ENGINE 1"
+            cor_engine = "#665B73"
             fonte_engine = (
                 "Segoe UI",
-                11,
+                10,
                 "bold"
             )
 

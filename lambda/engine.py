@@ -9,32 +9,10 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 # ==========================================================
-# CONSTANTES
-# ==========================================================
-QTD_PARES = 7
-QTD_IMPARES = 8
-
-QTD_PRIMOS = 5
-QTD_FIBONACCI = 4
-QTD_MULTIPLOS3 = 5
-QTD_MOLDURA = 9
-QTD_CENTRO = 6
-
-
-MAX_QTD_SEQUENCIAS = 3
-MAX_SEQUENCIA = 5
-TAMANHO_MINIMO_SEQUENCIA = 3
-
-
-TAMANHO_UNIVERSO = 19
-
-MAX_SEQUENCIA_FIXOS = 2
-MAX_TENTATIVAS_FIXOS = 100
-
-
-# ==========================================================
 # CONFIG
 # ==========================================================
+
+ENGINE = "ENGINE-03"
 
 REGION = "ap-east-1"
 
@@ -42,18 +20,51 @@ TABLE_NAME = "jogos_lotofacil"
 
 TABLE_ESTATISTICA = "estatistica_lotofacil"
 
-ENGINE = "ENGINE-01"
-
 ENGINE_VERSION = "1.0"
 
 # ==========================================================
 # DYNAMODB
 # ==========================================================
 
+TABLE_PARAMETROS = "parametrossistema"
+
 dynamodb = boto3.resource(
     "dynamodb",
     region_name=REGION
 )
+
+parametros_table = dynamodb.Table(
+    TABLE_PARAMETROS
+)
+
+
+def BuscarParametrosSistema():
+
+    response = parametros_table.get_item(
+
+        Key={
+
+            "pk": "LOTOFACIL",
+
+            "sk": "PARAMETROS"
+
+        }
+
+    )
+
+    item = response.get("Item")
+
+    if not item:
+
+        raise Exception(
+            "Parâmetros do sistema não encontrados no DynamoDB"
+        )
+
+    return item
+
+# ==========================================================
+# CONSTANTES
+# ==========================================================
 
 TABLE_RESULTADO = "resultado_lotofacil"
 
@@ -68,6 +79,86 @@ resultado_table = dynamodb.Table(
 estatistica_table = dynamodb.Table(
     TABLE_ESTATISTICA
 )
+
+# ==========================================================
+# PARÂMETROS DO SISTEMA
+# ==========================================================
+
+QTD_PARES = None
+QTD_IMPARES = None
+QTD_PRIMOS = None
+QTD_FIBONACCI = None
+QTD_MULTIPLOS3 = None
+QTD_MOLDURA = None
+QTD_CENTRO = None
+MAX_SEQUENCIA = None
+TAMANHO_MINIMO_SEQUENCIA = None
+MAX_QTD_SEQUENCIAS = None
+MAX_SEQUENCIA_FIXOS = None
+
+def CarregarParametrosSistema():
+
+    global QTD_PARES
+    global QTD_IMPARES
+    global QTD_PRIMOS
+    global QTD_FIBONACCI
+    global QTD_MULTIPLOS3
+    global QTD_MOLDURA
+    global QTD_CENTRO
+    global MAX_SEQUENCIA
+    global TAMANHO_MINIMO_SEQUENCIA
+    global MAX_QTD_SEQUENCIAS
+    global MAX_SEQUENCIA_FIXOS
+
+    PARAMETROS = BuscarParametrosSistema()
+
+    QTD_PARES = int(
+        PARAMETROS["QTD_PARES"]
+    )
+
+    QTD_IMPARES = int(
+        PARAMETROS["QTD_IMPARES"]
+    )
+
+    QTD_PRIMOS = int(
+        PARAMETROS["QTD_PRIMOS"]
+    )
+
+    QTD_FIBONACCI = int(
+        PARAMETROS["QTD_FIBONACCI"]
+    )
+
+    QTD_MULTIPLOS3 = int(
+        PARAMETROS["QTD_MULTIPLOS3"]
+    )
+
+    QTD_MOLDURA = int(
+        PARAMETROS["QTD_MOLDURA"]
+    )
+
+    QTD_CENTRO = int(
+        PARAMETROS["QTD_CENTRO"]
+    )
+
+    MAX_SEQUENCIA = int(
+        PARAMETROS["MAX_SEQUENCIA"]
+    )
+
+    TAMANHO_MINIMO_SEQUENCIA = int(
+        PARAMETROS["TAMANHO_MINIMO_SEQUENCIA"]
+    )
+
+    MAX_QTD_SEQUENCIAS = int(
+        PARAMETROS["MAX_QTD_SEQUENCIAS"]
+    )
+
+    MAX_SEQUENCIA_FIXOS = int(
+        PARAMETROS["MAX_SEQUENCIA_FIXOS"]
+    )    
+
+    
+TAMANHO_UNIVERSO = 19
+MAX_TENTATIVAS_FIXOS = 100
 
 def LimiteEngineAtingido():
 
@@ -1108,6 +1199,8 @@ def ResultadoProntoParaGerar():
 # ENGINE
 # ==========================================================
 def ExecutarEngine():
+
+    CarregarParametrosSistema()
 
     print("[LOTOFACIL] >>> ENTROU NA ENGINE <<<")
 
