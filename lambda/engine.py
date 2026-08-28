@@ -83,17 +83,71 @@ estatistica_table = dynamodb.Table(
 # ==========================================================
 # PARÂMETROS DO SISTEMA
 # ==========================================================
+#
+# Os valores abaixo são carregados do DynamoDB
+# pela função CarregarParametrosSistema().
+#
+# ----------------------------------------------------------
+# INDICADORES DO JOGO
+# ----------------------------------------------------------
+# QTD_PARES              → quantidade de números pares permitida
+# QTD_IMPARES            → quantidade de números ímpares permitida
+# QTD_PRIMOS             → quantidade de números primos permitida
+# QTD_FIBONACCI          → quantidade de números Fibonacci permitida
+# QTD_MULTIPLOS3         → quantidade de múltiplos de 3 permitida
+# QTD_MOLDURA            → quantidade de números da moldura permitida
+# QTD_CENTRO             → quantidade de números do centro permitida
+#
+
+# ----------------------------------------------------------
+# REGRAS DE SEQUÊNCIA
+# ----------------------------------------------------------
+# MAX_SEQUENCIA
+# → tamanho máximo de uma sequência.
+#   Exemplo: 01-02-03-04-05 = sequência de tamanho 5.
+#
+# TAMANHO_MINIMO_SEQUENCIA
+# → tamanho mínimo para considerar um bloco como sequência.
+#   Exemplo: 01-02-03 = sequência.
+#   Exemplo: 01-02 = não é considerado sequência.
+#
+# MAX_QTD_SEQUENCIAS
+# → quantidade máxima de blocos de sequência permitidos.
+#   Exemplo: 01-02-03 | 07-08-09 | 12-13-14 = 3 blocos.
+#   Se MAX_QTD_SEQUENCIAS = 3 → permitido.
+#   Com 4 blocos → não permitido.
+#
+# ----------------------------------------------------------
+# REGRAS DOS FIXOS
+# ----------------------------------------------------------
+# MAX_SEQUENCIA_FIXOS
+# → tamanho máximo de uma sequência entre os números fixos.
+#   Exemplo: fixos 01-02-03-07-08-10
+#   possui uma sequência de tamanho 3 (01-02-03).
+#
+# ==========================================================
+
 
 QTD_PARES = None
+
 QTD_IMPARES = None
+
 QTD_PRIMOS = None
+
 QTD_FIBONACCI = None
+
 QTD_MULTIPLOS3 = None
+
 QTD_MOLDURA = None
+
 QTD_CENTRO = None
+
 MAX_SEQUENCIA = None
+
 TAMANHO_MINIMO_SEQUENCIA = None
+
 MAX_QTD_SEQUENCIAS = None
+
 MAX_SEQUENCIA_FIXOS = None
 
 def CarregarParametrosSistema():
