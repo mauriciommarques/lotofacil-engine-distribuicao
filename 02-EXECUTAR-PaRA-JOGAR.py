@@ -27,11 +27,7 @@ PLAYWRIGHT_USER_DATA = (
     r"C:\Users\Mauricio\.playwright\lotofacil"
 )
 
-URL_LOTOFACIL = (
-    "https://www.sorteonline.com.br/"
-    "lotofacil/faca-seu-jogo/3775"
-)
-
+TABLE_PARAMETROS = "parametrossistema"
 
 # ==========================================================
 # CORES
@@ -61,6 +57,10 @@ dynamodb = boto3.resource(
 
 table = dynamodb.Table(
     TABLE_NAME
+)
+
+table_parametros = dynamodb.Table(
+    TABLE_PARAMETROS
 )
 
 
@@ -165,6 +165,51 @@ def limpar_jogos(jogos):
     )
 
     return total
+
+
+# ==========================================================
+# BUSCAR PRÓXIMO CONCURSO
+# ==========================================================
+
+def BuscarProximoConcurso():
+
+    response = table_parametros.get_item(
+        Key={
+            "pk": "LOTOFACIL",
+            "sk": "PARAMETROS"
+        }
+    )
+
+    item = response.get("Item")
+
+    if not item:
+        raise Exception(
+            "Parâmetros da LOTOFACIL não encontrados."
+        )
+
+    concurso_atualizado = int(
+        item["concurso_atualizado"]
+    )
+
+    proximo_concurso = (
+        concurso_atualizado + 1
+    )
+
+    print()
+    print("=" * 60)
+    print("CONTROLE DE CONCURSO")
+    print("=" * 60)
+    print(
+        f"Concurso atualizado : "
+        f"{concurso_atualizado}"
+    )
+    print(
+        f"Próximo concurso    : "
+        f"{proximo_concurso}"
+    )
+    print("=" * 60)
+
+    return proximo_concurso
 
 
 # ==========================================================
@@ -1150,6 +1195,13 @@ class LayoutLotofacil:
 
         try:
 
+            proximo_concurso = BuscarProximoConcurso()
+
+            url_lotofacil = (
+                "https://www.sorteonline.com.br/"
+                f"lotofacil/faca-seu-jogo/{proximo_concurso}"
+            )
+
             with sync_playwright() as p:
 
                 print()
@@ -1177,9 +1229,9 @@ class LayoutLotofacil:
                 )
 
                 page.goto(
-                    URL_LOTOFACIL,
+                    url_lotofacil,
                     wait_until="domcontentloaded"
-                )
+                )                
 
                 print(
                     "Página carregada."
