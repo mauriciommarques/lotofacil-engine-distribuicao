@@ -3,7 +3,7 @@ import boto3
 import random
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-ENGINE = 'ENGINE-03'
+ENGINE = 'ENGINE-01'
 REGION = 'ap-east-1'
 TABLE_NAME = 'jogos_lotofacil'
 TABLE_ESTATISTICA = 'estatistica_lotofacil'
@@ -63,7 +63,6 @@ def CarregarParametrosSistema():
     global MAX_SEQUENCIA_FIXOS
     PARAMETROS = BuscarParametrosSistema()
     if not ValidarParametrosAtualizados():
-        pass
         return None
     QTD_PARES = int(PARAMETROS['QTD_PARES'])
     QTD_IMPARES = int(PARAMETROS['QTD_IMPARES'])
@@ -122,10 +121,6 @@ def buscar_fixos_concurso_anterior():
         fixos = sorted(random.sample(item['listaDezenas'], 8))
         maior_seq = maior_sequencia(fixos)
         if maior_seq <= MAX_SEQUENCIA_FIXOS:
-            pass
-            pass
-            pass
-            pass
             return {'concurso': int(item['concurso']), 'fixos': fixos}
     raise Exception('Não foi possível encontrar 8 fixos sem sequência acima do limite.')
 
@@ -161,17 +156,11 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
     faltam_impares = QTD_IMPARES - len(impares_escolhidos)
     pares_disponiveis = [n for n in universo if n in pares and n not in pares_escolhidos]
     if len(pares_disponiveis) < faltam_pares:
-        pass
-        pass
-        pass
         return None
     novos_pares = random.sample(pares_disponiveis, faltam_pares)
     pares_escolhidos.extend(novos_pares)
     impares_disponiveis = [n for n in universo if n in impares and n not in impares_escolhidos]
     if len(impares_disponiveis) < faltam_impares:
-        pass
-        pass
-        pass
         return None
     novos_impares = random.sample(impares_disponiveis, faltam_impares)
     impares_escolhidos.extend(novos_impares)
@@ -180,11 +169,7 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
     fibonacci = {1, 2, 3, 5, 8, 13, 21}
     fib = [n for n in resultado if n in fibonacci]
     fib_fixos = [n for n in fib if n in numeros_fixos]
-    if len(fib_fixos) > QTD_FIBONACCI:
-        pass
-        pass
-        pass
-        pass
+    if len(fib_fixos) > QTD_FIBONACCI:        
         return None
     fib_removiveis = [n for n in fib if n in numeros_livres]
     EXCESSO_FIB = max(0, len(fib) - QTD_FIBONACCI)
@@ -254,10 +239,6 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
         EXCESSO_CENTRO = max(0, len(centro_jogo) - QTD_CENTRO)
         centro_fixos = [n for n in centro_jogo if n in numeros_fixos]
         if len(centro_fixos) > QTD_CENTRO:
-            pass
-            pass
-            pass
-            pass
             return None
         centro_livres = [n for n in centro_jogo if n in numeros_livres]
         while EXCESSO_CENTRO > 0:
@@ -290,10 +271,6 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
         primos_jogo = [n for n in resultado if n in primos]
         primos_fixos = [n for n in primos_jogo if n in numeros_fixos]
         if len(primos_fixos) > QTD_PRIMOS:
-            pass
-            pass
-            pass
-            pass
             return None
         primos_livres = [n for n in primos_jogo if n in numeros_livres]
         EXCESSO_PRIMOS = max(0, len(primos_jogo) - QTD_PRIMOS)
@@ -327,10 +304,6 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
         multiplos3_jogo = [n for n in resultado if n in multiplos3]
         multiplos3_fixos = [n for n in multiplos3_jogo if n in numeros_fixos]
         if len(multiplos3_fixos) > QTD_MULTIPLOS3:
-            pass
-            pass
-            pass
-            pass
             return None
         multiplos3_livres = [n for n in multiplos3_jogo if n in numeros_livres]
         EXCESSO_MULTIPLOS3 = max(0, len(multiplos3_jogo) - QTD_MULTIPLOS3)
@@ -365,12 +338,6 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
     status_qtd_sequencias = qtd_sequencias <= MAX_QTD_SEQUENCIAS
     status_sequencia = maior_sequencia(resultado) <= MAX_SEQUENCIA
     if not status_sequencia or not status_qtd_sequencias:
-        pass
-        pass
-        pass
-        pass
-        pass
-        pass
         return None
     status_moldura = len(moldura_jogo) == QTD_MOLDURA
     status_centro = len(centro_jogo) == QTD_CENTRO
@@ -381,30 +348,13 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
     status_fib = len(fib) == QTD_FIBONACCI
     status_total = len(resultado) == 15
     jogo_valido = all([status_fib, status_moldura, status_centro, status_primos, status_multiplos3, status_pares, status_impares, status_total, status_sequencia, status_qtd_sequencias])
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
-    pass
     agora = datetime.now(ZoneInfo('America/Sao_Paulo'))
     horario = agora.isoformat()
     data = agora.strftime('%Y-%m-%d')
     item = {'pk': 'JOGO', 'sk': horario, 'data': data, 'concurso': concurso, 'engine': ENGINE, 'engine_version': ENGINE_VERSION, 'fixos': numeros_fixos, 'universo': universo, 'jogo': resultado}
     if jogo_valido:
-        pass
         return item
     else:
-        pass
         return None
 
 def LimiteDiarioAtingido():
@@ -417,65 +367,34 @@ def LimiteDiarioAtingido():
 def ResultadoProntoParaGerar():
     agora = datetime.now(ZoneInfo('America/Sao_Paulo'))
     hoje = agora.date()
-    pass
     if hoje.weekday() == 6:
-        pass
         return False
     if hoje.weekday() == 0:
         data_esperada = hoje - timedelta(days=2)
     else:
         data_esperada = hoje - timedelta(days=1)
-    pass
     resultado = BuscarResultadoBanco()
     if not resultado:
-        pass
         return False
     data_resultado = datetime.strptime(resultado['dataApuracao'], '%d/%m/%Y').date()
-    pass
     if data_resultado < data_esperada:
-        pass
         return False
-    pass
-    pass
     return True
 
 def ExecutarEngine():
     CarregarParametrosSistema()
-    pass
-    pass
     if not ResultadoProntoParaGerar():
-        pass
         return None
-    pass
-    pass
     if LimiteDiarioAtingido():
-        pass
         return None
-    pass
     if LimiteEngineAtingido():
-        pass
         return None
-    pass
-    pass
-    pass
+
     dados = buscar_fixos_concurso_anterior()
-    pass
-    pass
-    pass
     concurso = dados['concurso']
     numeros_fixos = dados['fixos']
-    pass
     universo = montar_universo(numeros_fixos)
-    pass
-    pass
-    pass
-    pass
     jogo = gerar_jogo_inicial(universo, numeros_fixos, concurso)
-    if jogo:
-        pass
-        pass
-    else:
-        pass
     return jogo
 
 def SalvarEstatistica(item):
