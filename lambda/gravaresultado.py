@@ -559,6 +559,24 @@ def AtualizarResultado():
     # ======================================================
     # SALVA NOVO RESULTADO
     # ======================================================
+    print(
+        f"[LOTOFACIL] >>> NOVO RESULTADO ENCONTRADO <<<"
+    )
+
+    print(
+        f"[LOTOFACIL] Concurso: "
+        f"{resultado_online['concurso']}"
+    )
+
+    print(
+        f"[LOTOFACIL] Data concurso: "
+        f"{resultado_online['dataApuracao']}"
+    )
+
+    print(
+        f"[LOTOFACIL] Atualizado em: "
+        f"{datetime.now(ZoneInfo('America/Sao_Paulo'))}"
+    )
 
     SalvarResultadoBanco(
         resultado_online
