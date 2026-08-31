@@ -19,8 +19,7 @@ TABLE_NAME = "resultado_lotofacil"
 TABLE_ESTATISTICA = "estatistica_concurso"
 
 URL = (
-    "https://loteriascaixa-api.herokuapp.com/"
-    "api/lotofacil/latest"
+    "https://apiloterias.com.br/app/v2/resultado?loteria=lotofacil&token=qjkzMRqoKP1nXUd"
 )
 
 lambda_client = boto3.client(
@@ -201,9 +200,13 @@ def BuscarResultadoLotoFacilOnline():
 
         "sk": SK,
 
-        "concurso": dados["concurso"],
+        "concurso": int(
+            dados["numero_concurso"]
+        ),
 
-        "dataApuracao": dados["data"],
+        "dataApuracao": (
+            dados["data_concurso"]
+        ),
 
         "listaDezenas": [
 
@@ -214,7 +217,6 @@ def BuscarResultadoLotoFacilOnline():
         ]
 
     }
-
 
 # ==========================================================
 # PERSISTÊNCIA
@@ -492,7 +494,6 @@ def SalvarEstatisticaConcurso(resultado):
         "[LOTOFACIL] >>> ESTATÍSTICA DO CONCURSO SALVA <<<"
     )
 
-
 # ==========================================================
 # ATUALIZAÇÃO
 # ==========================================================
@@ -507,55 +508,40 @@ def AtualizarResultado():
         BuscarResultadoBanco()
     )
 
-    data_esperada = (
-        DataUltimoResultadoEsperado()
+    print(
+        f"[LOTOFACIL] Concurso API: "
+        f"{resultado_online['concurso']}"
     )
-
-    data_resultado = datetime.strptime(
-        resultado_online["dataApuracao"],
-        "%d/%m/%Y"
-    ).date()
 
     print(
         f"[LOTOFACIL] Data resultado API: "
-        f"{data_resultado}"
-    )
-
-    print(
-        f"[LOTOFACIL] Data resultado esperada: "
-        f"{data_esperada}"
+        f"{resultado_online['dataApuracao']}"
     )
 
     # ======================================================
-    # RESULTADO AINDA NÃO É O ESPERADO
-    # ======================================================
-
-    if data_resultado != data_esperada:
-
-        print(
-            "[LOTOFACIL] >>> RESULTADO ESPERADO "
-            "AINDA NÃO DISPONÍVEL <<<"
-        )
-
-        return {
-
-            "atualizado": False,
-
-            "resultado": resultado_banco
-
-        }
-
-    # ======================================================
-    # RESULTADO ESPERADO JÁ ESTÁ DISPONÍVEL
+    # VERIFICA SE JÁ EXISTE RESULTADO NO BANCO
     # ======================================================
 
     if resultado_banco:
 
-        if (
+        concurso_banco = int(
             resultado_banco["concurso"]
-            ==
+        )
+
+        concurso_online = int(
             resultado_online["concurso"]
-        ):
+        )
+
+        print(
+            f"[LOTOFACIL] Concurso banco: "
+            f"{concurso_banco}"
+        )
+
+        # ==================================================
+        # RESULTADO JÁ ATUALIZADO OU API ATRASADA
+        # ==================================================
+
+        if concurso_online <= concurso_banco:
 
             print(
                 "[LOTOFACIL] >>> RESULTADO "
@@ -569,6 +555,33 @@ def AtualizarResultado():
                 "resultado": resultado_banco
 
             }
+
+    # ======================================================
+    # SALVA NOVO RESULTADO
+    # ======================================================
+
+    SalvarResultadoBanco(
+        resultado_online
+    )
+
+    SalvarEstatisticaConcurso(
+        resultado_online
+    )
+
+    ChamarAtualizaEstatistica()
+
+    print(
+        "[LOTOFACIL] >>> NOVO RESULTADO SALVO <<<"
+    )
+
+    return {
+
+        "atualizado": True,
+
+        "resultado": resultado_online
+
+    }
+
 
     # ======================================================
     # SALVA NOVO RESULTADO
