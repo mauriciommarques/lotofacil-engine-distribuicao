@@ -600,34 +600,6 @@ def AtualizarResultado():
 
     }
 
-
-    # ======================================================
-    # SALVA NOVO RESULTADO
-    # ======================================================
-
-    SalvarResultadoBanco(
-        resultado_online
-    )
-
-    SalvarEstatisticaConcurso(
-        resultado_online
-    )
-
-    ChamarAtualizaEstatistica()
-
-    print(
-        "[LOTOFACIL] >>> NOVO RESULTADO SALVO <<<"
-    )
-
-    return {
-
-        "atualizado": True,
-
-        "resultado": resultado_online
-
-    }
-
-
 # ==========================================================
 # LAMBDA
 # ==========================================================
