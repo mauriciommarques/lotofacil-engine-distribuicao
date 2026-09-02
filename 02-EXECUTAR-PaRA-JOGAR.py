@@ -111,11 +111,11 @@ def BuscarJogos():
     ]
 
     jogos.sort(
-        key=lambda item: item.get(
-            "sk",
-            ""
+        key=lambda jogo: sum(
+            int(numero)
+            for numero in jogo.get("jogo", [])
         )
-    )
+    )    
 
     return jogos
 
@@ -994,12 +994,15 @@ class LayoutLotofacil:
             []
         )
 
+        soma_jogo = sum(dezenas)     
+
         tk.Label(
             detalhes,
             text=(
                 f"15 dezenas   •   "
                 f"Fixos: {len(fixos)}   •   "
-                f"Universo: {len(universo)}"
+                f"Universo: {len(universo)}   •   "
+                f"Soma: {soma_jogo}"             
             ),
             font=(
                 "Segoe UI",
