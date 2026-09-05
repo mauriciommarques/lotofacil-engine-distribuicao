@@ -1201,8 +1201,7 @@ class LayoutLotofacil:
             proximo_concurso = BuscarProximoConcurso()
 
             url_lotofacil = (
-                "https://www.sorteonline.com.br/"
-                f"lotofacil/faca-seu-jogo/{proximo_concurso}"
+                "https://www.sorteonline.com.br/lotofacil-da-independencia/faca-seu-jogo/3780"
             )
 
             with sync_playwright() as p:

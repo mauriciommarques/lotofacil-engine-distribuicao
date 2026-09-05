@@ -11,6 +11,7 @@ ENGINE_VERSION = '1.0'
 TABLE_PARAMETROS = 'parametrossistema'
 dynamodb = boto3.resource('dynamodb', region_name=REGION)
 parametros_table = dynamodb.Table(TABLE_PARAMETROS)
+FORCAR_GERACAO = True
 
 def ValidarParametrosAtualizados():
     parametros = BuscarParametrosSistema()
@@ -365,6 +366,8 @@ def LimiteDiarioAtingido():
     return quantidade > 15
 
 def ResultadoProntoParaGerar():
+    if FORCAR_GERACAO:
+        return True
     agora = datetime.now(ZoneInfo('America/Sao_Paulo'))
     hoje = agora.date()
     if hoje.weekday() == 6:
