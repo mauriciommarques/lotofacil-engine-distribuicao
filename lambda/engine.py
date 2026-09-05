@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 ENGINE = 'ENGINE-01'
 REGION = 'ap-east-1'
 TABLE_NAME = 'jogos_lotofacil'
-TABLE_ESTATISTICA = 'estatistica_lotofacil'
+
 ENGINE_VERSION = '1.0'
 TABLE_PARAMETROS = 'parametrossistema'
 dynamodb = boto3.resource('dynamodb', region_name=REGION)
@@ -37,7 +37,7 @@ def BuscarParametrosSistema():
 TABLE_RESULTADO = 'resultado_lotofacil'
 table = dynamodb.Table(TABLE_NAME)
 resultado_table = dynamodb.Table(TABLE_RESULTADO)
-estatistica_table = dynamodb.Table(TABLE_ESTATISTICA)
+
 QTD_PARES = None
 QTD_IMPARES = None
 QTD_PRIMOS = None
@@ -400,11 +400,6 @@ def ExecutarEngine():
     jogo = gerar_jogo_inicial(universo, numeros_fixos, concurso)
     return jogo
 
-def SalvarEstatistica(item):
-    agora = datetime.now(ZoneInfo('America/Sao_Paulo'))
-    estatistica = {'pk': 'ESTATISTICA', 'sk': agora.isoformat(), 'data': agora.strftime('%Y-%m-%d'), 'concurso': item['concurso'], 'engine': item['engine'], 'engine_version': item['engine_version'], 'quantidade_primos': len([n for n in item['jogo'] if n in {2, 3, 5, 7, 11, 13, 17, 19, 23}]), 'quantidade_pares': len([n for n in item['jogo'] if n % 2 == 0]), 'quantidade_fibonacci': len([n for n in item['jogo'] if n in {1, 2, 3, 5, 8, 13, 21}]), 'quantidade_multiplos3': len([n for n in item['jogo'] if n % 3 == 0]), 'quantidade_moldura': len([n for n in item['jogo'] if n in {1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25}]), 'quantidade_centro': len([n for n in item['jogo'] if n in {12, 13, 14, 17, 18, 19}]), 'quantidade_sequencias': contar_sequencias(item['jogo']), 'maior_sequencia': maior_sequencia(item['jogo']), 'quantidade_total': len(item['jogo'])}
-    estatistica_table.put_item(Item=estatistica)
-
 def SalvarJogo(item):
     table.put_item(Item=item)
 
@@ -416,7 +411,6 @@ def lambda_handler(event, context):
         jogo = ExecutarEngine()
         if jogo:
             SalvarJogo(jogo)
-            SalvarEstatistica(jogo)
             return {'statusCode': 200, 'body': json.dumps({'mensagem': 'Jogo salvo com sucesso.'})}
         return {'statusCode': 204, 'body': json.dumps({'mensagem': 'Nenhum jogo encontrado.'})}
     except Exception as erro:
