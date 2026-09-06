@@ -10,8 +10,16 @@ dynamodb = boto3.resource(
 
 table = dynamodb.Table(TABLE_NAME)
 
+def LimparTabela(confirmacao=False):
 
-def LimparTabela():
+    if not confirmacao:
+
+        print("=" * 60)
+        print("[LOTOFACIL] LIMPEZA CANCELADA")
+        print("=" * 60)
+        print("[LOTOFACIL] Confirmação obrigatória para apagar os jogos.")
+
+        return
 
     print("=" * 60)
     print("[LOTOFACIL] INICIANDO LIMPEZA DA TABELA")
@@ -24,10 +32,6 @@ def LimparTabela():
         []
     )
 
-    print(
-        f"[LOTOFACIL] Itens encontrados: {len(itens)}"
-    )
-
     while "LastEvaluatedKey" in response:
 
         response = table.scan(
@@ -37,6 +41,10 @@ def LimparTabela():
         itens.extend(
             response.get("Items", [])
         )
+
+    print(
+        f"[LOTOFACIL] Itens encontrados: {len(itens)}"
+    )
 
     if not itens:
 
@@ -65,7 +73,6 @@ def LimparTabela():
         "[LOTOFACIL] >>> TABELA LIMPA <<<"
     )
 
-
 def lambda_handler(event, context):
 
     try:
@@ -91,4 +98,20 @@ def lambda_handler(event, context):
 
 # EXECUÇÃO LOCAL
 if __name__ == "__main__":
-    LimparTabela()
+
+    resposta = input(
+        "ATENÇÃO: apagar TODOS os jogos. Digite SIM para confirmar: "
+    )
+
+    if resposta == "SIM":
+
+        LimparTabela(
+            confirmacao=True
+        )
+
+    else:
+
+        print(
+            "[LOTOFACIL] Operação cancelada."
+        )
+
