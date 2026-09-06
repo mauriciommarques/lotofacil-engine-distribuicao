@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 import time
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 
 # ==========================================================
@@ -62,7 +62,6 @@ table = dynamodb.Table(
 table_parametros = dynamodb.Table(
     TABLE_PARAMETROS
 )
-
 
 # ==========================================================
 # BUSCAR JOGOS
@@ -215,12 +214,10 @@ def BuscarProximoConcurso():
 # ==========================================================
 # APOSTAR NO SITE
 # ==========================================================
-
 def apostar(
     page,
     jogo
 ):
-
     dezenas = jogo.get(
         "jogo",
         []
@@ -256,7 +253,6 @@ def apostar(
     for numero in dezenas:
 
         numero = int(numero)
-
         texto = f"{numero:02d}"
 
         print(
@@ -268,27 +264,23 @@ def apostar(
             f"number-button-{numero}"
         )
 
-        botao_numero.wait_for()
+        botao_numero.wait_for(
+            state="visible",
+            timeout=30000
+        )
 
         botao_numero.click()
 
         time.sleep(1)
 
     # ------------------------------------------------------
-    # AGUARDAR VALIDAÇÃO
+    # AGUARDAR BOTÃO INCLUIR APOSTA
     # ------------------------------------------------------
 
     print()
-
     print(
         "Aguardando validação do volante..."
     )
-
-    time.sleep(2)
-
-    # ------------------------------------------------------
-    # INCLUIR APOSTA
-    # ------------------------------------------------------
 
     botao = page.get_by_role(
         "button",
@@ -296,7 +288,23 @@ def apostar(
         exact=True
     )
 
-    botao.wait_for()
+    botao.wait_for(
+        state="visible",
+        timeout=30000
+    )
+
+    print(
+        "Aguardando botão "
+        "'Incluir aposta' ficar habilitado..."
+    )
+
+    expect(botao).to_be_enabled(
+        timeout=30000
+    )
+
+    print(
+        "Botão habilitado."
+    )
 
     print(
         "Incluindo aposta no carrinho..."
@@ -309,8 +317,6 @@ def apostar(
     print(
         "Aposta incluída no carrinho."
     )
-
-
 # ==========================================================
 # APLICAÇÃO
 # ==========================================================
@@ -1135,6 +1141,7 @@ class LayoutLotofacil:
     def executar_apostas(
         self
     ):
+        tela_fechada = False
 
         # --------------------------------------------------
         # VERIFICAR SE EXISTEM JOGOS SELECIONADOS
@@ -1320,25 +1327,14 @@ class LayoutLotofacil:
                 # A pergunta acontece ANTES de esperar
                 # o fechamento do navegador.
                 #
-
                 resposta = messagebox.askyesno(
-                    "Aposta realizada",
-                    (
-                        f"{total} jogo(s) foram "
-                        "enviados para o carrinho.\n\n"
-                        "Deseja limpar esses jogos "
-                        "do DynamoDB?"
-                    )
+                    "Limpar banco de dados",
+                    "Deseja zerar a base de dados?"
                 )
 
-
                 if resposta:
-
                     try:
-
-                        quantidade_removida = (
-                            limpar_jogos(jogos)
-                        )
+                        quantidade_removida = limpar_jogos(self.jogos)
 
                         self.info.config(
                             text=(
@@ -1354,14 +1350,22 @@ class LayoutLotofacil:
                             "Banco de dados",
                             (
                                 f"{quantidade_removida} "
-                                "jogo(s) apostado(s) "
-                                "foram removidos "
+                                "jogo(s) foram removidos "
                                 "do DynamoDB."
                             )
                         )
 
-                    except Exception as erro:
+                        self.jogos.clear()
+                        self.selecionados.clear()
 
+                        # ------------------------------------------
+                        # FECHAR VISUALIZADOR
+                        # ------------------------------------------
+
+                        tela_fechada = True
+                        self.root.destroy()
+
+                    except Exception as erro:
                         messagebox.showerror(
                             "Erro ao limpar banco",
                             (
@@ -1382,21 +1386,20 @@ class LayoutLotofacil:
                         )
                     )
 
-
                 # ------------------------------------------
                 # LIMPAR SELEÇÃO DA INTERFACE
                 # ------------------------------------------
 
-                self.selecionados.clear()
-
-                self.atualizar_contador()
-
+                if not tela_fechada:
+                    self.selecionados.clear()
+                    self.atualizar_contador()
 
                 # ------------------------------------------
                 # NAVEGADOR CONTINUA ABERTO
                 # ------------------------------------------
 
                 print()
+
                 print(
                     "Navegador permanece aberto."
                 )
@@ -1409,7 +1412,6 @@ class LayoutLotofacil:
                 print(
                     "Feche o navegador quando terminar."
                 )
-
 
                 # ------------------------------------------
                 # AGUARDAR FECHAMENTO
@@ -1440,16 +1442,13 @@ class LayoutLotofacil:
                 )
             )
 
-
         finally:
-
-            self.apostar_button.config(
-                state="normal",
-                text="Enviar selecionados para aposta"
-            )
-
-            self.root.update()
-
+            if not tela_fechada:
+                self.apostar_button.config(
+                    state="normal",
+                    text="Enviar selecionados para aposta"
+                )
+                self.root.update()
 
     # ======================================================
     # SCROLL
