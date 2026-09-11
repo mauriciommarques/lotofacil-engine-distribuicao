@@ -766,10 +766,6 @@ def AtualizarParametros():
     return parametros
 
 
-# ==========================================================
-# LAMBDA
-# ==========================================================
-
 def lambda_handler(
     event,
     context
@@ -780,76 +776,109 @@ def lambda_handler(
         "=========================================================="
     )
     print(
-        "[LOTOFACIL] >>> ATUALIZAÇÃO DE PARÂMETROS <<<"
+        "[LOTOFACIL] >>> ATUALIZAÇÃO AUTOMÁTICA DESABILITADA <<<"
     )
     print(
         "=========================================================="
     )
 
-    print(
-        f"[LOTOFACIL] QTD_DIAS: {QTD_DIAS}"
-    )
-
-
-    try:
-
-        parametros = AtualizarParametros()
-
-
-        print()
-        print(
-            "[LOTOFACIL] >>> CONFIGURAÇÃO "
-            "APLICADA COM SUCESSO <<<"
+    return {
+        "statusCode": 200,
+        "body": json.dumps(
+            {
+                "mensagem": "Atualização automática desabilitada para experimento."
+            },
+            ensure_ascii=False
         )
+    }
 
 
-        return {
-
-            "statusCode": 200,
-
-            "body": json.dumps(
-
-                {
-
-                    "mensagem":
-                        "Parâmetros atualizados.",
-
-                    "parametros":
-                        parametros
-
-                },
-
-                ensure_ascii=False
-
-            )
-
-        }
 
 
-    except Exception as erro:
+# ==========================================================
+# LAMBDA REAL
+# ==========================================================
 
-        print()
-        print(
-            f"[LOTOFACIL] >>> ERRO: {erro} <<<"
-        )
+# def lambda_handler(
+#     event,
+#     context
+# ):
+
+#     print()
+#     print(
+#         "=========================================================="
+#     )
+#     print(
+#         "[LOTOFACIL] >>> ATUALIZAÇÃO DE PARÂMETROS <<<"
+#     )
+#     print(
+#         "=========================================================="
+#     )
+
+#     print(
+#         f"[LOTOFACIL] QTD_DIAS: {QTD_DIAS}"
+#     )
 
 
-        return {
+#     try:
 
-            "statusCode": 500,
+#         parametros = AtualizarParametros()
 
-            "body": json.dumps(
 
-                {
+#         print()
+#         print(
+#             "[LOTOFACIL] >>> CONFIGURAÇÃO "
+#             "APLICADA COM SUCESSO <<<"
+#         )
 
-                    "erro":
-                        str(erro)
 
-                },
+#         return {
 
-                ensure_ascii=False
+#             "statusCode": 200,
 
-            )
+#             "body": json.dumps(
 
-        }
+#                 {
+
+#                     "mensagem":
+#                         "Parâmetros atualizados.",
+
+#                     "parametros":
+#                         parametros
+
+#                 },
+
+#                 ensure_ascii=False
+
+#             )
+
+#         }
+
+
+#     except Exception as erro:
+
+#         print()
+#         print(
+#             f"[LOTOFACIL] >>> ERRO: {erro} <<<"
+#         )
+
+
+#         return {
+
+#             "statusCode": 500,
+
+#             "body": json.dumps(
+
+#                 {
+
+#                     "erro":
+#                         str(erro)
+
+#                 },
+
+#                 ensure_ascii=False
+
+#             )
+
+#         }
 

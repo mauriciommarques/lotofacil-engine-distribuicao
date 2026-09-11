@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 # CONFIG
 # ==========================================================
 
-ENGINE = "ENGINE-03"
+ENGINE = "ENGINE-01"
 
 REGION = "ap-east-1"
 
@@ -1623,3 +1623,15 @@ def lambda_handler(event, context):
             })
         }
 
+if __name__ == "__main__":
+
+    print("========================================")
+    print(" TESTE LOCAL DA ENGINE LOTOFÁCIL ")
+    print("========================================")
+
+    resultado = lambda_handler({}, None)
+
+    print("========================================")
+    print(" RESULTADO FINAL ")
+    print("========================================")
+    print(resultado)

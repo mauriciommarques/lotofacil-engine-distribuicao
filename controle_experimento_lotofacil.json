@@ -1,0 +1,11 @@
+{
+    "experimento": "EXPERIMENTO_7_DIAS",
+    "data_inicio": "2026-09-07",
+    "dias": {
+        "1": {
+            "data": "2026-09-07",
+            "quantidade_planejada": 20,
+            "quantidade_gerada": 0
+        }
+    }
+}
