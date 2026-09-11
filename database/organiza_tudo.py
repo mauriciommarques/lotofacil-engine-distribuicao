@@ -1937,10 +1937,9 @@ def organizar_apostas():
     linhas = texto.strip().splitlines()
 
     apostas = []
-    aposta_atual = []
 
     # ========================================================
-    # LER O BLOCO
+    # LER AS APOSTAS
     # ========================================================
 
     for linha in linhas:
@@ -1950,44 +1949,114 @@ def organizar_apostas():
         if not linha:
             continue
 
+        # ====================================================
+        # FORMATO:
+        #
+        # Aposta 1 - 01 03 04 05 06 ...
+        #
+        # ====================================================
+
         if linha.lower().startswith("aposta"):
-
-            if aposta_atual:
-                apostas.append(aposta_atual)
-
-            aposta_atual = []
-
-        else:
 
             try:
 
-                numero = int(linha)
+                # Pega somente a parte depois do "-"
+                if "-" in linha:
 
-                if 1 <= numero <= 25:
-                    aposta_atual.append(numero)
+                    parte_numeros = linha.split("-", 1)[1]
 
-            except ValueError:
+                    numeros = []
+
+                    for valor in parte_numeros.split():
+
+                        try:
+
+                            numero = int(valor)
+
+                            if 1 <= numero <= 25:
+                                numeros.append(numero)
+
+                        except ValueError:
+                            pass
+
+                    if numeros:
+                        apostas.append(
+                            sorted(numeros)
+                        )
+
+                # ====================================================
+                # FORMATO ANTIGO:
+                #
+                # Aposta 1
+                # 01
+                # 03
+                # 04
+                #
+                # ====================================================
+
+                else:
+
+                    aposta_atual = []
+
+                    # Procura as próximas linhas até encontrar
+                    # outra "Aposta"
+
+                    continue
+
+            except Exception:
                 pass
 
 
-    # Guarda a última
-    if aposta_atual:
-        apostas.append(aposta_atual)
+    # ========================================================
+    # CASO NÃO TENHA ENCONTRADO APOSTAS NO FORMATO NOVO,
+    # TENTA O FORMATO ANTIGO
+    # ========================================================
+
+    if not apostas:
+
+        apostas = []
+
+        aposta_atual = []
+
+        for linha in linhas:
+
+            linha = linha.strip()
+
+            if not linha:
+                continue
+
+            if linha.lower().startswith("aposta"):
+
+                if aposta_atual:
+                    apostas.append(
+                        sorted(aposta_atual)
+                    )
+
+                aposta_atual = []
+
+            else:
+
+                try:
+
+                    numero = int(linha)
+
+                    if 1 <= numero <= 25:
+                        aposta_atual.append(numero)
+
+                except ValueError:
+                    pass
+
+        # Guarda a última aposta
+
+        if aposta_atual:
+            apostas.append(
+                sorted(aposta_atual)
+            )
 
 
-    # ============================================================
-    # ORDENA TODAS AS APOSTAS
-    # ============================================================
-
-    apostas = [
-        sorted(aposta)
-        for aposta in apostas
-    ]
-
-
-    # ============================================================
+    # ========================================================
     # LIMPA RESULTADO
-    # ============================================================
+    # ========================================================
 
     resultado.delete(
         "1.0",
@@ -1995,14 +2064,16 @@ def organizar_apostas():
     )
 
 
-    # ============================================================
+    # ========================================================
     # MOSTRA APOSTAS ORGANIZADAS
-    # ============================================================
+    # ========================================================
 
     resultado.insert(
         tk.END,
         "APOSTAS ORGANIZADAS\n"
     )
+
+    apostas.sort()
 
     resultado.insert(
         tk.END,
@@ -2022,14 +2093,14 @@ def organizar_apostas():
         )
 
         resultado.insert(
-            tk.END,
-            f"Aposta {numero} - {dezenas}\n"
+            tk.END,            
+            f"Aposta {numero:03d} -  {dezenas}\n"
         )
 
 
-    # ============================================================
+    # ========================================================
     # ENCONTRAR DUPLICADAS
-    # ============================================================
+    # ========================================================
 
     grupos = {}
 
@@ -2046,9 +2117,9 @@ def organizar_apostas():
         grupos[chave].append(numero)
 
 
-    # ============================================================
+    # ========================================================
     # FILTRA SOMENTE AS DUPLICADAS
-    # ============================================================
+    # ========================================================
 
     duplicadas = {
         chave: numeros
@@ -2057,9 +2128,9 @@ def organizar_apostas():
     }
 
 
-    # ============================================================
+    # ========================================================
     # MOSTRA DUPLICADAS
-    # ============================================================
+    # ========================================================
 
     resultado.insert(
         tk.END,
@@ -2117,9 +2188,9 @@ def organizar_apostas():
         )
 
 
-    # ============================================================
+    # ========================================================
     # RESUMO
-    # ============================================================
+    # ========================================================
 
     resultado.insert(
         tk.END,
