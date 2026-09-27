@@ -1,0 +1,29 @@
+#colocar o trecho abaixo apos a ultima linha da engine.py
+if __name__ == "__main__":
+    import time
+
+    tentativa = 0
+
+    while True:
+        tentativa += 1
+
+        resultado = lambda_handler({}, None)
+
+        print(
+            f"Tentativa {tentativa} -> "
+            f"status {resultado['statusCode']}"
+        )
+
+        if resultado["statusCode"] == 200:
+            print("\n========================")
+            print("FUNCIONANDO TUDO OK!")
+            print("========================")
+            print(resultado)
+            break
+
+        if resultado["statusCode"] == 500:
+            print("\nERRO NA ENGINE:")
+            print(resultado)
+            break
+
+        time.sleep(5)

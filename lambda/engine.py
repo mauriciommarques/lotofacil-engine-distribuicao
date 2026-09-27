@@ -3,7 +3,7 @@ import boto3
 import random
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-ENGINE = 'ENGINE-03'
+ENGINE = 'ENGINE-01'
 REGION = 'ap-east-1'
 TABLE_NAME = 'jogos_lotofacil'
 
