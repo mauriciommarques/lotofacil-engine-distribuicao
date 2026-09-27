@@ -843,6 +843,11 @@ class LayoutLotofacil:
             "-"
         )
 
+        tipo_combinacao = jogo.get(
+            "tipo_combinacao",
+            ""
+        )        
+
 
         # --------------------------------------------------
         # IDENTIFICAÇÃO DA ENGINE
@@ -888,6 +893,11 @@ class LayoutLotofacil:
             text=(
                 f"Concurso: {concurso}"
                 f"   •   {texto_engine}"
+                + (
+                    f"   •   COMBINAÇÃO: {tipo_combinacao}"
+                    if tipo_combinacao
+                    else ""
+                )
             ),
             font=fonte_engine,
             fg=cor_engine,
