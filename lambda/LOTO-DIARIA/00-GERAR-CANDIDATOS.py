@@ -29,6 +29,53 @@ jogos_table = dynamodb.Table(
     TABLE_JOGOS
 )
 
+
+# ==========================================================
+# ZERAR TABELA DE JOGOS
+# ==========================================================
+
+def zerar_tabela_jogos():
+
+    response = jogos_table.scan(
+        ProjectionExpression="pk, sk"
+    )
+
+    itens = response.get("Items", [])
+
+    while "LastEvaluatedKey" in response:
+
+        response = jogos_table.scan(
+            ProjectionExpression="pk, sk",
+            ExclusiveStartKey=response["LastEvaluatedKey"]
+        )
+
+        itens.extend(
+            response.get("Items", [])
+        )
+
+    if not itens:
+        print("Tabela jogos_lotofacil já está vazia.")
+        return 0
+
+    with jogos_table.batch_writer() as batch:
+
+        for item in itens:
+
+            batch.delete_item(
+                Key={
+                    "pk": item["pk"],
+                    "sk": item["sk"]
+                }
+            )
+
+    print(
+        f"{len(itens)} jogo(s) removido(s) "
+        "de jogos_lotofacil."
+    )
+
+    return len(itens)
+
+
 # ==========================================================
 # SALVAR COMBINAÇÕES NA TABELA DE JOGOS
 # ==========================================================
@@ -185,7 +232,13 @@ def lambda_handler(event, context):
 
     try:
 
+        # Primeiro monta tudo em memória.
+        # Se houver problema no resultado anterior,
+        # não apagamos os jogos existentes.
         resultado = montar_conjuntos_concurso_anterior()
+
+        # A nova projeção sempre substitui a anterior.
+        removidos = zerar_tabela_jogos()
 
         quantidade = salvar_combinacoes(
             resultado
@@ -194,8 +247,9 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             "body": json.dumps({
-                "mensagem": "Combinações salvas com sucesso.",
-                "quantidade": quantidade,
+                "mensagem": "Projeção gerada com sucesso.",
+                "jogos_removidos": removidos,
+                "jogos_salvos": quantidade,
                 "concurso": resultado["concurso_anterior"] + 1
             })
         }
@@ -216,12 +270,13 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
 
     print("\n========================================")
-    print(" NOVA ENGINE - EXECUÇÃO LOCAL")
+    print(" GERAR CANDIDATOS - EXECUÇÃO LOCAL")
     print("========================================")
 
     resposta = lambda_handler({}, None)
 
+    print()
     print(f"Status: {resposta['statusCode']}")
     print(f"Resposta: {resposta['body']}")
 
-    print("========================================\n")
+    print("========================================\n")    
