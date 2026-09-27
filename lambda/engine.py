@@ -14,14 +14,19 @@ parametros_table = dynamodb.Table(TABLE_PARAMETROS)
 FORCAR_GERACAO = False
 
 
-# Limite máximo de números consecutivos permitido no jogo final de 15 dezenas.
-# Ex.: valor 6 aceita até 6 consecutivos e rejeita sequências de 7 ou mais.
-MAX_CONSECUTIVOS_JOGO = 6
-
-# Limite máximo de números consecutivos permitido entre os 8 números fixos
-# escolhidos do concurso anterior.
-# Ex.: valor 6 aceita até 6 consecutivos e rejeita sequências de 7 ou mais.
+# Limite máximo de números consecutivos permitido ENTRE OS 8 NÚMEROS FIXOS
+# selecionados do resultado do concurso anterior.
+# Esta validação acontece antes da montagem do jogo final.
+# Ex.: valor 6 permite que os 8 fixos contenham no máximo um bloco de
+# 6 números consecutivos; uma seleção com 7 ou mais consecutivos é rejeitada.
 MAX_CONSECUTIVOS_FIXOS = 6
+
+# Limite máximo de números consecutivos permitido NO JOGO FINAL DE 15 DEZENAS.
+# Esta validação acontece depois que os números fixos e os números livres
+# já foram combinados para formar o jogo.
+# Ex.: valor 6 permite no máximo um bloco de 6 números consecutivos no jogo;
+# se a combinação final formar 7 ou mais consecutivos, o jogo é rejeitado.
+MAX_CONSECUTIVOS_JOGO = 6
 
 def ValidarParametrosAtualizados():
     parametros = BuscarParametrosSistema()
