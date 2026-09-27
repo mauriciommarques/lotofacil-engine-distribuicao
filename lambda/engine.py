@@ -3,7 +3,7 @@ import boto3
 import random
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-ENGINE = 'ENGINE-01'
+ENGINE = 'ENGINE-03'
 REGION = 'ap-east-1'
 TABLE_NAME = 'jogos_lotofacil'
 
@@ -11,7 +11,17 @@ ENGINE_VERSION = '1.0'
 TABLE_PARAMETROS = 'parametrossistema'
 dynamodb = boto3.resource('dynamodb', region_name=REGION)
 parametros_table = dynamodb.Table(TABLE_PARAMETROS)
-FORCAR_GERACAO = True
+FORCAR_GERACAO = False
+
+
+# Limite máximo de números consecutivos permitido no jogo final de 15 dezenas.
+# Ex.: valor 6 aceita até 6 consecutivos e rejeita sequências de 7 ou mais.
+MAX_CONSECUTIVOS_JOGO = 6
+
+# Limite máximo de números consecutivos permitido entre os 8 números fixos
+# escolhidos do concurso anterior.
+# Ex.: valor 6 aceita até 6 consecutivos e rejeita sequências de 7 ou mais.
+MAX_CONSECUTIVOS_FIXOS = 6
 
 def ValidarParametrosAtualizados():
     parametros = BuscarParametrosSistema()
@@ -45,10 +55,8 @@ QTD_FIBONACCI = None
 QTD_MULTIPLOS3 = None
 QTD_MOLDURA = None
 QTD_CENTRO = None
-MAX_SEQUENCIA = None
 TAMANHO_MINIMO_SEQUENCIA = None
 MAX_QTD_SEQUENCIAS = None
-MAX_SEQUENCIA_FIXOS = None
 
 def CarregarParametrosSistema():
     global QTD_PARES
@@ -58,10 +66,8 @@ def CarregarParametrosSistema():
     global QTD_MULTIPLOS3
     global QTD_MOLDURA
     global QTD_CENTRO
-    global MAX_SEQUENCIA
     global TAMANHO_MINIMO_SEQUENCIA
     global MAX_QTD_SEQUENCIAS
-    global MAX_SEQUENCIA_FIXOS
     PARAMETROS = BuscarParametrosSistema()
     if not ValidarParametrosAtualizados():
         return None
@@ -72,10 +78,8 @@ def CarregarParametrosSistema():
     QTD_MULTIPLOS3 = int(PARAMETROS['QTD_MULTIPLOS3'])
     QTD_MOLDURA = int(PARAMETROS['QTD_MOLDURA'])
     QTD_CENTRO = int(PARAMETROS['QTD_CENTRO'])
-    MAX_SEQUENCIA = int(PARAMETROS['MAX_SEQUENCIA'])
     TAMANHO_MINIMO_SEQUENCIA = int(PARAMETROS['TAMANHO_MINIMO_SEQUENCIA'])
     MAX_QTD_SEQUENCIAS = int(PARAMETROS['MAX_QTD_SEQUENCIAS'])
-    MAX_SEQUENCIA_FIXOS = int(PARAMETROS['MAX_SEQUENCIA_FIXOS'])
 TAMANHO_UNIVERSO = 19
 MAX_TENTATIVAS_FIXOS = 100
 
@@ -86,7 +90,7 @@ def LimiteEngineAtingido():
     quantidade = len([jogo for jogo in jogos if jogo.get('data') == hoje and jogo.get('engine') == ENGINE])
     return quantidade >= 5
 
-def maior_sequencia(jogo):
+def maior_bloco_consecutivo(jogo):
     jogo = sorted(jogo)
     maior = 1
     atual = 1
@@ -120,10 +124,10 @@ def buscar_fixos_concurso_anterior():
         raise Exception('Resultado da Lotofácil não encontrado.')
     for tentativa in range(MAX_TENTATIVAS_FIXOS):
         fixos = sorted(random.sample(item['listaDezenas'], 8))
-        maior_seq = maior_sequencia(fixos)
-        if maior_seq <= MAX_SEQUENCIA_FIXOS:
+        maior_bloco = maior_bloco_consecutivo(fixos)
+        if maior_bloco <= MAX_CONSECUTIVOS_FIXOS:
             return {'concurso': int(item['concurso']), 'fixos': fixos}
-    raise Exception('Não foi possível encontrar 8 fixos sem sequência acima do limite.')
+    raise Exception('Não foi possível encontrar 8 fixos sem bloco consecutivo acima do limite.')
 
 def BuscarResultadoBanco():
     response = resultado_table.get_item(Key={'pk': 'LOTOFACIL', 'sk': 'ULTIMO'})
@@ -337,8 +341,8 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
             EXCESSO_MULTIPLOS3 = max(0, len(multiplos3_jogo) - QTD_MULTIPLOS3)
     qtd_sequencias = contar_sequencias(resultado)
     status_qtd_sequencias = qtd_sequencias <= MAX_QTD_SEQUENCIAS
-    status_sequencia = maior_sequencia(resultado) <= MAX_SEQUENCIA
-    if not status_sequencia or not status_qtd_sequencias:
+    status_consecutivos = maior_bloco_consecutivo(resultado) <= MAX_CONSECUTIVOS_JOGO
+    if not status_consecutivos or not status_qtd_sequencias:
         return None
     status_moldura = len(moldura_jogo) == QTD_MOLDURA
     status_centro = len(centro_jogo) == QTD_CENTRO
@@ -348,7 +352,7 @@ def gerar_jogo_inicial(universo, numeros_fixos, concurso):
     status_multiplos3 = len(multiplos3_jogo) == QTD_MULTIPLOS3
     status_fib = len(fib) == QTD_FIBONACCI
     status_total = len(resultado) == 15
-    jogo_valido = all([status_fib, status_moldura, status_centro, status_primos, status_multiplos3, status_pares, status_impares, status_total, status_sequencia, status_qtd_sequencias])
+    jogo_valido = all([status_fib, status_moldura, status_centro, status_primos, status_multiplos3, status_pares, status_impares, status_total, status_consecutivos, status_qtd_sequencias])
     agora = datetime.now(ZoneInfo('America/Sao_Paulo'))
     horario = agora.isoformat()
     data = agora.strftime('%Y-%m-%d')
