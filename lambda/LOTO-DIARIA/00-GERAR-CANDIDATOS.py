@@ -1,5 +1,7 @@
 import json
 import boto3
+import random
+
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -7,11 +9,17 @@ from zoneinfo import ZoneInfo
 # ==========================================================
 # CONFIGURAÇÃO
 # ==========================================================
+
 REGION = "ap-east-1"
+
 TABLE_RESULTADO = "resultado_lotofacil"
 TABLE_JOGOS = "jogos_lotofacil"
+
 TAMANHO_CONJUNTO = 9
+
 ENGINE = "DESDOBRAMENTO-SIMPLES"
+
+
 # ==========================================================
 # DYNAMODB
 # ==========================================================
@@ -40,7 +48,10 @@ def zerar_tabela_jogos():
         ProjectionExpression="pk, sk"
     )
 
-    itens = response.get("Items", [])
+    itens = response.get(
+        "Items",
+        []
+    )
 
     while "LastEvaluatedKey" in response:
 
@@ -50,11 +61,18 @@ def zerar_tabela_jogos():
         )
 
         itens.extend(
-            response.get("Items", [])
+            response.get(
+                "Items",
+                []
+            )
         )
 
     if not itens:
-        print("Tabela jogos_lotofacil já está vazia.")
+
+        print(
+            "Tabela jogos_lotofacil já está vazia."
+        )
+
         return 0
 
     with jogos_table.batch_writer() as batch:
@@ -86,10 +104,14 @@ def salvar_combinacoes(resultado):
         ZoneInfo("America/Sao_Paulo")
     )
 
-    data = agora.strftime("%Y-%m-%d")
+    data = agora.strftime(
+        "%Y-%m-%d"
+    )
 
     # Os jogos serão destinados ao concurso seguinte
-    concurso = resultado["concurso_anterior"] + 1
+    concurso = (
+        resultado["concurso_anterior"] + 1
+    )
 
     combinacoes = {
         "AR": resultado["combinacao_ar"],
@@ -134,9 +156,12 @@ def buscar_resultado_concurso_anterior():
         }
     )
 
-    item = response.get("Item")
+    item = response.get(
+        "Item"
+    )
 
     if not item:
+
         raise Exception(
             "Resultado da Lotofácil não encontrado."
         )
@@ -148,18 +173,26 @@ def buscar_resultado_concurso_anterior():
 # SEPARAR CONJUNTO A E CONJUNTO B
 # ==========================================================
 
-def separar_conjuntos(dezenas_anteriores):
+def separar_conjuntos(
+    dezenas_embaralhadas
+):
 
-    if len(dezenas_anteriores) != 15:
+    if len(dezenas_embaralhadas) != 15:
+
         raise Exception(
-            "O concurso anterior deve possuir exatamente 15 dezenas."
+            "O concurso anterior deve possuir "
+            "exatamente 15 dezenas."
         )
 
-    # Primeiras 9 dezenas da esquerda para a direita
-    conjunto_a = dezenas_anteriores[:TAMANHO_CONJUNTO]
+    # Primeiras 9 posições após o embaralhamento
+    conjunto_a = (
+        dezenas_embaralhadas[:TAMANHO_CONJUNTO]
+    )
 
-    # Últimas 9 dezenas
-    conjunto_b = dezenas_anteriores[-TAMANHO_CONJUNTO:]
+    # Últimas 9 posições após o embaralhamento
+    conjunto_b = (
+        dezenas_embaralhadas[-TAMANHO_CONJUNTO:]
+    )
 
     return conjunto_a, conjunto_b
 
@@ -170,57 +203,199 @@ def separar_conjuntos(dezenas_anteriores):
 
 def montar_conjuntos_concurso_anterior():
 
-    resultado_anterior = buscar_resultado_concurso_anterior()
-
-    # 15 dezenas sorteadas no concurso anterior
-    dezenas_anteriores = sorted([
-        int(numero)
-        for numero in resultado_anterior["listaDezenas"]
-    ])
-
-    # Conjuntos posicionais A e B
-    conjunto_a, conjunto_b = separar_conjuntos(
-        dezenas_anteriores
+    resultado_anterior = (
+        buscar_resultado_concurso_anterior()
     )
 
-    # 10 dezenas que NÃO foram sorteadas
+    concurso_anterior = int(
+        resultado_anterior["concurso"]
+    )
+
+    # ======================================================
+    # 15 DEZENAS DO CONCURSO ANTERIOR
+    # ======================================================
+
+    dezenas_anteriores = [
+        int(numero)
+        for numero
+        in resultado_anterior["listaDezenas"]
+    ]
+
+    if len(dezenas_anteriores) != 15:
+
+        raise Exception(
+            "O concurso anterior deve possuir "
+            "exatamente 15 dezenas."
+        )
+
+    # ======================================================
+    # GERADOR ALEATÓRIO DO CONCURSO
+    # ======================================================
+    #
+    # A semente é o próprio concurso anterior.
+    #
+    # Isso significa:
+    #
+    # concurso 3790 -> sempre o mesmo embaralhamento
+    # concurso 3791 -> outro embaralhamento
+    # concurso 3792 -> outro embaralhamento
+    #
+    # Dessa forma podemos reproduzir a projeção.
+    # ======================================================
+
+    gerador = random.Random(
+        concurso_anterior
+    )
+
+
+    # ======================================================
+    # EMBARALHAR AS 15 SORTEADAS
+    # ======================================================
+
+    dezenas_embaralhadas = (
+        dezenas_anteriores.copy()
+    )
+
+    gerador.shuffle(
+        dezenas_embaralhadas
+    )
+
+
+    # ======================================================
+    # FORMAR A E B
+    # ======================================================
+
+    conjunto_a, conjunto_b = separar_conjuntos(
+        dezenas_embaralhadas
+    )
+
+
+    # ======================================================
+    # DESCOBRIR AS 10 NÃO SORTEADAS
+    # ======================================================
+
     nao_sorteadas = [
         numero
         for numero in range(1, 26)
         if numero not in dezenas_anteriores
     ]
 
-    # Primeiras 6 dezenas das não sorteadas
-    conjunto_r = nao_sorteadas[:6]
+    if len(nao_sorteadas) != 10:
 
-    # Últimas 6 dezenas das não sorteadas
-    conjunto_s = nao_sorteadas[-6:]   
+        raise Exception(
+            "Devem existir exatamente "
+            "10 dezenas não sorteadas."
+        )
 
-    # ==========================================================
+
+    # ======================================================
+    # EMBARALHAR AS 10 NÃO SORTEADAS
+    # ======================================================
+
+    nao_sorteadas_embaralhadas = (
+        nao_sorteadas.copy()
+    )
+
+    gerador.shuffle(
+        nao_sorteadas_embaralhadas
+    )
+
+
+    # ======================================================
+    # FORMAR R E S
+    # ======================================================
+
+    # Primeiras 6 posições após o embaralhamento
+    conjunto_r = (
+        nao_sorteadas_embaralhadas[:6]
+    )
+
+    # Últimas 6 posições após o embaralhamento
+    conjunto_s = (
+        nao_sorteadas_embaralhadas[-6:]
+    )
+
+
+    # ======================================================
     # MONTAR AS 4 COMBINAÇÕES
-    # ==========================================================
+    # ======================================================
+    #
+    # IMPORTANTE:
+    #
+    # Aqui podemos ordenar.
+    #
+    # A escolha das dezenas JÁ aconteceu.
+    # O sorted() daqui para baixo serve somente
+    # para apresentar/salvar o cartão organizado.
+    # ======================================================
 
-    combinacao_ar = sorted(conjunto_a + conjunto_r)
-    combinacao_as = sorted(conjunto_a + conjunto_s)
-    combinacao_br = sorted(conjunto_b + conjunto_r)
-    combinacao_bs = sorted(conjunto_b + conjunto_s)     
+    combinacao_ar = sorted(
+        conjunto_a + conjunto_r
+    )
+
+    combinacao_as = sorted(
+        conjunto_a + conjunto_s
+    )
+
+    combinacao_br = sorted(
+        conjunto_b + conjunto_r
+    )
+
+    combinacao_bs = sorted(
+        conjunto_b + conjunto_s
+    )
+
+
+    # ======================================================
+    # RETORNO
+    # ======================================================
 
     return {
-        "concurso_anterior": int(
-            resultado_anterior["concurso"]
-        ),
-        "dezenas_concurso_anterior": dezenas_anteriores,
-        "nao_sorteadas": nao_sorteadas,
 
-        "conjunto_a": conjunto_a,
-        "conjunto_b": conjunto_b,
-        "conjunto_r": conjunto_r,
-        "conjunto_s": conjunto_s,
+        "concurso_anterior":
+            concurso_anterior,
 
-        "combinacao_ar": combinacao_ar,
-        "combinacao_as": combinacao_as,
-        "combinacao_br": combinacao_br,
-        "combinacao_bs": combinacao_bs
+        # Resultado original
+        "dezenas_concurso_anterior":
+            dezenas_anteriores,
+
+        # Resultado após embaralhamento
+        "dezenas_embaralhadas":
+            dezenas_embaralhadas,
+
+        # Não sorteadas originais
+        "nao_sorteadas":
+            nao_sorteadas,
+
+        # Não sorteadas após embaralhamento
+        "nao_sorteadas_embaralhadas":
+            nao_sorteadas_embaralhadas,
+
+        # Conjuntos
+        "conjunto_a":
+            conjunto_a,
+
+        "conjunto_b":
+            conjunto_b,
+
+        "conjunto_r":
+            conjunto_r,
+
+        "conjunto_s":
+            conjunto_s,
+
+        # Combinações finais
+        "combinacao_ar":
+            combinacao_ar,
+
+        "combinacao_as":
+            combinacao_as,
+
+        "combinacao_br":
+            combinacao_br,
+
+        "combinacao_bs":
+            combinacao_bs
     }
 
 
@@ -228,29 +403,67 @@ def montar_conjuntos_concurso_anterior():
 # HANDLER
 # ==========================================================
 
-def lambda_handler(event, context):
+def lambda_handler(
+    event,
+    context
+):
 
     try:
 
+        # --------------------------------------------------
         # Primeiro monta tudo em memória.
-        # Se houver problema no resultado anterior,
-        # não apagamos os jogos existentes.
-        resultado = montar_conjuntos_concurso_anterior()
+        # --------------------------------------------------
+        #
+        # Se houver qualquer problema com o resultado
+        # anterior, a tabela atual NÃO será apagada.
+        # --------------------------------------------------
 
-        # A nova projeção sempre substitui a anterior.
-        removidos = zerar_tabela_jogos()
-
-        quantidade = salvar_combinacoes(
-            resultado
+        resultado = (
+            montar_conjuntos_concurso_anterior()
         )
+
+
+        # --------------------------------------------------
+        # APAGAR PROJEÇÃO ANTERIOR
+        # --------------------------------------------------
+
+        removidos = (
+            zerar_tabela_jogos()
+        )
+
+
+        # --------------------------------------------------
+        # SALVAR NOVA PROJEÇÃO
+        # --------------------------------------------------
+
+        quantidade = (
+            salvar_combinacoes(
+                resultado
+            )
+        )
+
+
+        # --------------------------------------------------
+        # RETORNO
+        # --------------------------------------------------
 
         return {
             "statusCode": 200,
+
             "body": json.dumps({
-                "mensagem": "Projeção gerada com sucesso.",
-                "jogos_removidos": removidos,
-                "jogos_salvos": quantidade,
-                "concurso": resultado["concurso_anterior"] + 1
+                "mensagem":
+                    "Projeção gerada com sucesso.",
+
+                "jogos_removidos":
+                    removidos,
+
+                "jogos_salvos":
+                    quantidade,
+
+                "concurso":
+                    resultado[
+                        "concurso_anterior"
+                    ] + 1
             })
         }
 
@@ -258,10 +471,12 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 500,
+
             "body": json.dumps({
                 "erro": str(erro)
             })
         }
+
 
 # ==========================================================
 # TESTE LOCAL
@@ -269,14 +484,113 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
 
-    print("\n========================================")
+    print()
+    print("========================================")
     print(" GERAR CANDIDATOS - EXECUÇÃO LOCAL")
     print("========================================")
 
-    resposta = lambda_handler({}, None)
+    # Primeiro montamos para poder visualizar
+    # exatamente como os conjuntos foram formados.
+
+    resultado = (
+        montar_conjuntos_concurso_anterior()
+    )
 
     print()
-    print(f"Status: {resposta['statusCode']}")
-    print(f"Resposta: {resposta['body']}")
+    print(
+        "Concurso anterior:",
+        resultado["concurso_anterior"]
+    )
 
-    print("========================================\n")    
+    print()
+    print(
+        "Resultado anterior:",
+        resultado["dezenas_concurso_anterior"]
+    )
+
+    print()
+    print(
+        "Sorteadas embaralhadas:",
+        resultado["dezenas_embaralhadas"]
+    )
+
+    print()
+    print(
+        "A:",
+        resultado["conjunto_a"]
+    )
+
+    print(
+        "B:",
+        resultado["conjunto_b"]
+    )
+
+    print()
+    print(
+        "Não sorteadas:",
+        resultado["nao_sorteadas"]
+    )
+
+    print()
+    print(
+        "Não sorteadas embaralhadas:",
+        resultado["nao_sorteadas_embaralhadas"]
+    )
+
+    print()
+    print(
+        "R:",
+        resultado["conjunto_r"]
+    )
+
+    print(
+        "S:",
+        resultado["conjunto_s"]
+    )
+
+    print()
+    print("========================================")
+    print(" COMBINAÇÕES FINAIS")
+    print("========================================")
+
+    print(
+        "AR:",
+        resultado["combinacao_ar"]
+    )
+
+    print(
+        "AS:",
+        resultado["combinacao_as"]
+    )
+
+    print(
+        "BR:",
+        resultado["combinacao_br"]
+    )
+
+    print(
+        "BS:",
+        resultado["combinacao_bs"]
+    )
+
+    print()
+    print("========================================")
+    print(" SALVANDO PROJEÇÃO")
+    print("========================================")
+
+    resposta = lambda_handler(
+        {},
+        None
+    )
+
+    print()
+    print(
+        f"Status: {resposta['statusCode']}"
+    )
+
+    print(
+        f"Resposta: {resposta['body']}"
+    )
+
+    print("========================================")
+    print()
