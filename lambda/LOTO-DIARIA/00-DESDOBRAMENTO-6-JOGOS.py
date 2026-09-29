@@ -15,7 +15,7 @@ REGION = "ap-east-1"
 TABLE_RESULTADO = "resultado_lotofacil"
 TABLE_JOGOS = "jogos_lotofacil"
 
-ENGINE = "DESDOBRAMENTO-5"
+ENGINE = "DESDOBRAMENTO-6"
 
 
 # ==========================================================
@@ -121,7 +121,7 @@ def zerar_tabela_jogos():
 
 
 # ==========================================================
-# MONTAR OS 5 JOGOS
+# MONTAR OS 6 JOGOS
 # ==========================================================
 
 def montar_jogos():
@@ -450,9 +450,13 @@ def montar_jogos():
         complemento_5
     )
 
+    jogo_6 = (
+        restantes +
+        nao_sorteadas_embaralhadas
+    )
 
     # ======================================================
-    # VALIDAR OS 5 JOGOS COMPLETOS
+    # VALIDAR OS 6 JOGOS COMPLETOS
     # ======================================================
 
     jogos = [
@@ -460,7 +464,8 @@ def montar_jogos():
         jogo_2,
         jogo_3,
         jogo_4,
-        jogo_5
+        jogo_5,
+        jogo_6
     ]
 
     for indice, jogo in enumerate(
@@ -526,6 +531,9 @@ def montar_jogos():
         jogo_5
     )
 
+    jogo_6_final = sorted(
+        jogo_6
+    )
 
     # ======================================================
     # RETORNO
@@ -609,12 +617,15 @@ def montar_jogos():
             jogo_4_final,
 
         "jogo_5":
-            jogo_5_final
+            jogo_5_final,
+
+        "jogo_6":
+            jogo_6_final            
     }
 
 
 # ==========================================================
-# SALVAR OS 5 JOGOS
+# SALVAR OS 6 JOGOS
 # ==========================================================
 
 def salvar_jogos(
@@ -639,7 +650,9 @@ def salvar_jogos(
         "J2": resultado["jogo_2"],
         "J3": resultado["jogo_3"],
         "J4": resultado["jogo_4"],
-        "J5": resultado["jogo_5"]
+        "J5": resultado["jogo_5"],
+        "J6": resultado["jogo_6"],
+
     }
 
     for nome, dezenas in jogos.items():
@@ -748,7 +761,7 @@ def lambda_handler(
             "G5:",
             resultado["g5"]
         )
-
+    
         print(
             "Restantes:",
             resultado["restantes"]
@@ -784,7 +797,6 @@ def lambda_handler(
             "JOGO 5:",
             resultado["jogo_5_parcial"]
         )
-
 
         print()
         print("========================================")
@@ -835,7 +847,7 @@ def lambda_handler(
 
         print()
         print("========================================")
-        print(" 5 JOGOS FINAIS - 15 DEZENAS")
+        print(" 6 JOGOS FINAIS - 15 DEZENAS")
         print("========================================")
 
         print(
@@ -862,6 +874,11 @@ def lambda_handler(
             "JOGO 5:",
             resultado["jogo_5"]
         )
+
+        print(
+            "JOGO 6:",
+            resultado["jogo_6"]
+        )        
 
         print("========================================")
 
@@ -896,7 +913,7 @@ def lambda_handler(
             "body": json.dumps({
 
                 "mensagem":
-                    "Projeção de 5 jogos gerada "
+                    "Projeção de 6 jogos gerada "
                     "com sucesso.",
 
                 "jogos_removidos":
