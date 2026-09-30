@@ -29,6 +29,7 @@ PLAYWRIGHT_USER_DATA = (
 
 TABLE_PARAMETROS = "parametrossistema"
 
+
 # ==========================================================
 # CORES
 # ==========================================================
@@ -62,6 +63,7 @@ table = dynamodb.Table(
 table_parametros = dynamodb.Table(
     TABLE_PARAMETROS
 )
+
 
 # ==========================================================
 # BUSCAR JOGOS
@@ -109,12 +111,20 @@ def BuscarJogos():
 
     ]
 
+    # ======================================================
+    # ORDENA OS CARTÕES PELA SOMA
+    #
+    # IMPORTANTE:
+    # NÃO ordena as dezenas dentro dos jogos.
+    # Apenas define a ordem em que os cartões aparecem.
+    # ======================================================
+
     jogos.sort(
         key=lambda jogo: sum(
             int(numero)
             for numero in jogo.get("jogo", [])
         )
-    )    
+    )
 
     return jogos
 
@@ -159,6 +169,7 @@ def limpar_jogos(jogos):
         )
 
     print()
+
     print(
         f"{total} jogo(s) removido(s) com sucesso."
     )
@@ -179,9 +190,12 @@ def BuscarProximoConcurso():
         }
     )
 
-    item = response.get("Item")
+    item = response.get(
+        "Item"
+    )
 
     if not item:
+
         raise Exception(
             "Parâmetros da LOTOFACIL não encontrados."
         )
@@ -198,14 +212,17 @@ def BuscarProximoConcurso():
     print("=" * 60)
     print("CONTROLE DE CONCURSO")
     print("=" * 60)
+
     print(
         f"Concurso atualizado : "
         f"{concurso_atualizado}"
     )
+
     print(
         f"Próximo concurso    : "
         f"{proximo_concurso}"
     )
+
     print("=" * 60)
 
     return proximo_concurso
@@ -214,10 +231,12 @@ def BuscarProximoConcurso():
 # ==========================================================
 # APOSTAR NO SITE
 # ==========================================================
+
 def apostar(
     page,
     jogo
 ):
+
     dezenas = jogo.get(
         "jogo",
         []
@@ -246,14 +265,25 @@ def apostar(
 
     print()
 
+
     # ------------------------------------------------------
     # MARCAR DEZENAS
+    #
+    # IMPORTANTE:
+    # Percorre exatamente a sequência armazenada no jogo.
+    #
+    # NÃO ORDENAR.
     # ------------------------------------------------------
 
     for numero in dezenas:
 
-        numero = int(numero)
-        texto = f"{numero:02d}"
+        numero = int(
+            numero
+        )
+
+        texto = (
+            f"{numero:02d}"
+        )
 
         print(
             "Marcando",
@@ -273,11 +303,13 @@ def apostar(
 
         time.sleep(1)
 
+
     # ------------------------------------------------------
     # AGUARDAR BOTÃO INCLUIR APOSTA
     # ------------------------------------------------------
 
     print()
+
     print(
         "Aguardando validação do volante..."
     )
@@ -298,7 +330,9 @@ def apostar(
         "'Incluir aposta' ficar habilitado..."
     )
 
-    expect(botao).to_be_enabled(
+    expect(
+        botao
+    ).to_be_enabled(
         timeout=30000
     )
 
@@ -317,6 +351,8 @@ def apostar(
     print(
         "Aposta incluída no carrinho."
     )
+
+
 # ==========================================================
 # APLICAÇÃO
 # ==========================================================
@@ -351,7 +387,7 @@ class LayoutLotofacil:
 
         self.selecionados = set()
 
-        self.cards = {}        
+        self.cards = {}
 
         self.cards_frame = None
 
@@ -669,7 +705,9 @@ class LayoutLotofacil:
 
         try:
 
-            self.jogos = BuscarJogos()
+            self.jogos = (
+                BuscarJogos()
+            )
 
         except Exception as erro:
 
@@ -723,6 +761,7 @@ class LayoutLotofacil:
 
             return
 
+
         for indice, jogo in enumerate(
             self.jogos,
             start=1
@@ -746,29 +785,34 @@ class LayoutLotofacil:
         jogo
     ):
 
-
         engine = jogo.get(
             "engine",
             "-"
         )
 
         if engine == "ENGINE":
+
             cor_borda = COR_DESTAQUE
             espessura_borda = 2
             fundo_card = "#F8F3FF"
+
         else:
+
             cor_borda = COR_BORDA
             espessura_borda = 1
             fundo_card = COR_CARTAO
+
 
         card = tk.Frame(
             self.cards_frame,
             bg=fundo_card,
             highlightbackground=cor_borda,
             highlightthickness=espessura_borda
-        )        
+        )
 
-        self.cards[indice - 1] = card        
+        self.cards[
+            indice - 1
+        ] = card
 
         card.pack(
             fill="x",
@@ -818,6 +862,7 @@ class LayoutLotofacil:
             side="left"
         )
 
+
         tk.Label(
             topo,
             text=f"Jogo {indice:02d}",
@@ -833,6 +878,7 @@ class LayoutLotofacil:
             padx=(4, 12)
         )
 
+
         concurso = jogo.get(
             "concurso",
             "-"
@@ -846,7 +892,7 @@ class LayoutLotofacil:
         tipo_combinacao = jogo.get(
             "tipo_combinacao",
             ""
-        )        
+        )
 
 
         # --------------------------------------------------
@@ -854,8 +900,10 @@ class LayoutLotofacil:
         # --------------------------------------------------
 
         if engine == "ENGINE":
+
             texto_engine = "ENGINE 1"
             cor_engine = "#665B73"
+
             fonte_engine = (
                 "Segoe UI",
                 10,
@@ -863,8 +911,10 @@ class LayoutLotofacil:
             )
 
         elif engine == "ENGINE-02":
+
             texto_engine = "ENGINE 2"
             cor_engine = "#665B73"
+
             fonte_engine = (
                 "Segoe UI",
                 10,
@@ -872,8 +922,10 @@ class LayoutLotofacil:
             )
 
         elif engine == "ENGINE-03":
+
             texto_engine = "ENGINE 3"
             cor_engine = "#665B73"
+
             fonte_engine = (
                 "Segoe UI",
                 10,
@@ -881,12 +933,18 @@ class LayoutLotofacil:
             )
 
         else:
-            texto_engine = f"ENGINE: {engine}"
+
+            texto_engine = (
+                f"ENGINE: {engine}"
+            )
+
             cor_engine = "#665B73"
+
             fonte_engine = (
                 "Segoe UI",
                 10
             )
+
 
         tk.Label(
             topo,
@@ -894,7 +952,8 @@ class LayoutLotofacil:
                 f"Concurso: {concurso}"
                 f"   •   {texto_engine}"
                 + (
-                    f"   •   COMBINAÇÃO: {tipo_combinacao}"
+                    f"   •   COMBINAÇÃO: "
+                    f"{tipo_combinacao}"
                     if tipo_combinacao
                     else ""
                 )
@@ -904,7 +963,8 @@ class LayoutLotofacil:
             bg=COR_CARTAO
         ).pack(
             side="left"
-        )        
+        )
+
 
         # --------------------------------------------------
         # GRADE DE DEZENAS
@@ -921,6 +981,14 @@ class LayoutLotofacil:
             pady=(2, 18)
         )
 
+
+        # --------------------------------------------------
+        # SET usado SOMENTE para representação visual.
+        #
+        # Não modifica jogo["jogo"].
+        # Não interfere na ordem utilizada na aposta.
+        # --------------------------------------------------
+
         dezenas = set(
             int(numero)
             for numero in jogo.get(
@@ -928,6 +996,7 @@ class LayoutLotofacil:
                 []
             )
         )
+
 
         for numero in range(
             1,
@@ -955,6 +1024,7 @@ class LayoutLotofacil:
 
                 bg = COR_VAZIO
                 fg = COR_TEXTO
+
 
             numero_label = tk.Label(
                 grade,
@@ -1010,7 +1080,10 @@ class LayoutLotofacil:
             []
         )
 
-        soma_jogo = sum(dezenas)     
+        soma_jogo = sum(
+            dezenas
+        )
+
 
         tk.Label(
             detalhes,
@@ -1018,7 +1091,7 @@ class LayoutLotofacil:
                 f"15 dezenas   •   "
                 f"Fixos: {len(fixos)}   •   "
                 f"Universo: {len(universo)}   •   "
-                f"Soma: {soma_jogo}"             
+                f"Soma: {soma_jogo}"
             ),
             font=(
                 "Segoe UI",
@@ -1041,7 +1114,9 @@ class LayoutLotofacil:
         variavel
     ):
 
-        card = self.cards.get(indice)
+        card = self.cards.get(
+            indice
+        )
 
         if variavel.get():
 
@@ -1050,6 +1125,7 @@ class LayoutLotofacil:
             )
 
             if card:
+
                 card.config(
                     bg="#F1E9FC",
                     highlightbackground=COR_DESTAQUE,
@@ -1063,6 +1139,7 @@ class LayoutLotofacil:
             )
 
             if card:
+
                 card.config(
                     bg=COR_CARTAO,
                     highlightbackground=COR_BORDA,
@@ -1070,6 +1147,7 @@ class LayoutLotofacil:
                 )
 
         self.atualizar_contador()
+
 
     # ======================================================
     # CONTADOR
@@ -1111,6 +1189,7 @@ class LayoutLotofacil:
 
             return
 
+
         jogos = [
             self.jogos[indice]
             for indice in sorted(
@@ -1137,10 +1216,13 @@ class LayoutLotofacil:
                 f"Jogo {indice:02d}: {dezenas}"
             )
 
+
         messagebox.showinfo(
             "Jogos selecionados",
             "Jogos escolhidos:\n\n"
-            + "\n".join(linhas)
+            + "\n".join(
+                linhas
+            )
         )
 
 
@@ -1151,7 +1233,9 @@ class LayoutLotofacil:
     def executar_apostas(
         self
     ):
+
         tela_fechada = False
+
 
         # --------------------------------------------------
         # VERIFICAR SE EXISTEM JOGOS SELECIONADOS
@@ -1169,6 +1253,9 @@ class LayoutLotofacil:
 
         # --------------------------------------------------
         # PEGAR SOMENTE OS JOGOS SELECIONADOS
+        #
+        # O sorted() aqui ordena os ÍNDICES selecionados,
+        # não as dezenas dos cartões.
         # --------------------------------------------------
 
         jogos = [
@@ -1215,12 +1302,16 @@ class LayoutLotofacil:
 
         try:
 
-            proximo_concurso = BuscarProximoConcurso()
+            proximo_concurso = (
+                BuscarProximoConcurso()
+            )
 
             url_lotofacil = (
                 "https://www.sorteonline.com.br/"
-                f"lotofacil/faca-seu-jogo/{proximo_concurso}"
+                f"lotofacil/faca-seu-jogo/"
+                f"{proximo_concurso}"
             )
+
 
             with sync_playwright() as p:
 
@@ -1228,6 +1319,7 @@ class LayoutLotofacil:
                 print("=" * 60)
                 print("ABRINDO SORTE ONLINE")
                 print("=" * 60)
+
 
                 context = (
                     p.chromium.launch_persistent_context(
@@ -1237,7 +1329,9 @@ class LayoutLotofacil:
                     )
                 )
 
-                page = context.new_page()
+                page = (
+                    context.new_page()
+                )
 
 
                 # ------------------------------------------
@@ -1251,20 +1345,25 @@ class LayoutLotofacil:
                 page.goto(
                     url_lotofacil,
                     wait_until="domcontentloaded"
-                )                
+                )
 
                 print(
                     "Página carregada."
                 )
 
-                time.sleep(5)
+                time.sleep(
+                    5
+                )
 
 
                 # ------------------------------------------
                 # ENVIAR JOGOS
                 # ------------------------------------------
 
-                total = len(jogos)
+                total = len(
+                    jogos
+                )
+
 
                 for indice, jogo in enumerate(
                     jogos,
@@ -1280,13 +1379,17 @@ class LayoutLotofacil:
 
                     self.root.update()
 
+
                     print()
                     print("=" * 60)
+
                     print(
                         f"JOGO SELECIONADO "
                         f"{indice} DE {total}"
                     )
+
                     print("=" * 60)
+
 
                     apostar(
                         page,
@@ -1307,11 +1410,14 @@ class LayoutLotofacil:
 
                 self.root.update()
 
+
                 print()
                 print("=" * 60)
+
                 print(
                     "TODOS OS JOGOS FORAM ENVIADOS"
                 )
+
                 print("=" * 60)
 
 
@@ -1333,19 +1439,22 @@ class LayoutLotofacil:
                 # ------------------------------------------
                 # LIMPAR DYNAMODB
                 # ------------------------------------------
-                #
-                # IMPORTANTE:
-                # A pergunta acontece ANTES de esperar
-                # o fechamento do navegador.
-                #
+
                 resposta = messagebox.askyesno(
                     "Limpar banco de dados",
                     "Deseja zerar a base de dados?"
                 )
 
+
                 if resposta:
+
                     try:
-                        quantidade_removida = limpar_jogos(self.jogos)
+
+                        quantidade_removida = (
+                            limpar_jogos(
+                                self.jogos
+                            )
+                        )
 
                         self.info.config(
                             text=(
@@ -1357,6 +1466,7 @@ class LayoutLotofacil:
 
                         self.root.update()
 
+
                         messagebox.showinfo(
                             "Banco de dados",
                             (
@@ -1366,17 +1476,23 @@ class LayoutLotofacil:
                             )
                         )
 
+
                         self.jogos.clear()
+
                         self.selecionados.clear()
 
-                        # ------------------------------------------
+
+                        # ----------------------------------
                         # FECHAR VISUALIZADOR
-                        # ------------------------------------------
+                        # ----------------------------------
 
                         tela_fechada = True
+
                         self.root.destroy()
 
+
                     except Exception as erro:
+
                         messagebox.showerror(
                             "Erro ao limpar banco",
                             (
@@ -1386,6 +1502,7 @@ class LayoutLotofacil:
                                 f"DynamoDB:\n\n{erro}"
                             )
                         )
+
 
                 else:
 
@@ -1397,13 +1514,17 @@ class LayoutLotofacil:
                         )
                     )
 
+
                 # ------------------------------------------
                 # LIMPAR SELEÇÃO DA INTERFACE
                 # ------------------------------------------
 
                 if not tela_fechada:
+
                     self.selecionados.clear()
+
                     self.atualizar_contador()
+
 
                 # ------------------------------------------
                 # NAVEGADOR CONTINUA ABERTO
@@ -1423,6 +1544,7 @@ class LayoutLotofacil:
                 print(
                     "Feche o navegador quando terminar."
                 )
+
 
                 # ------------------------------------------
                 # AGUARDAR FECHAMENTO
@@ -1445,6 +1567,7 @@ class LayoutLotofacil:
                 erro
             )
 
+
             messagebox.showerror(
                 "Erro na aposta",
                 (
@@ -1453,13 +1576,18 @@ class LayoutLotofacil:
                 )
             )
 
+
         finally:
+
             if not tela_fechada:
+
                 self.apostar_button.config(
                     state="normal",
                     text="Enviar selecionados para aposta"
                 )
+
                 self.root.update()
+
 
     # ======================================================
     # SCROLL
