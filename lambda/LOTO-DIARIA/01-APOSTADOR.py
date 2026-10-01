@@ -1005,11 +1005,11 @@ class LayoutLotofacil:
 
             linha = (
                 numero - 1
-            ) // 9
+            ) // 5
 
             coluna = (
                 numero - 1
-            ) % 9
+            ) % 5
 
             escolhido = (
                 numero in dezenas
