@@ -1005,11 +1005,11 @@ class LayoutLotofacil:
 
             linha = (
                 numero - 1
-            ) // 5
+            ) // 6
 
             coluna = (
                 numero - 1
-            ) % 5
+            ) % 6
 
             escolhido = (
                 numero in dezenas
@@ -1633,3 +1633,5 @@ if __name__ == "__main__":
     )
 
     root.mainloop()
+
+    
